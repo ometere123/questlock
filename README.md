@@ -116,6 +116,15 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 creator / sponsor guard
+
+- Backend-enforced — **no contract change**. Sits in front of `/api/proof/submit` before any GitHub or scoring work runs.
+- `quests.sponsor_wallet` (nullable) added so sponsor-published quests carry both the publishing admin (`created_by`) and the original sponsor wallet. v1 sample quests and direct-API-created quests are unaffected (column is NULL).
+- Pure guard in `lib/creator-guard.ts` — case-insensitive, testable without DB.
+- Blocked submission returns HTTP 403 with `error = "You cannot submit proof for a quest you created or sponsored."` and `blockedBy = "creator" | "sponsor"`.
+- UI on `/quests/[id]`: `CreatorGuardNotice` renders a red banner above the form, and the Submit button itself is disabled with the same copy.
+- Existing v1 submissions are untouched.
+
 ## v1.1 quest analytics
 
 - Admin-only read-only dashboard at **`/ops-ql/analytics`** built from cards, tables and percentages — no charting library, no client state beyond a refresh button.

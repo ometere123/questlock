@@ -21,18 +21,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           theme: "light",
           accentColor: "#834A1F",
           logo: "/logo.svg",
-          walletList: ["metamask", "coinbase_wallet", "rainbow", "wallet_connect"],
           showWalletLoginFirst: false,
           landingHeader: "Sign in to QuestLock",
-          loginMessage: "Sign in with email and we will create a wallet for you, or connect an existing wallet.",
         },
         loginMethods: ["email", "google", "wallet"],
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
           requireUserPasswordOnCreate: false,
-        },
-        externalWallets: {
-          coinbaseWallet: { connectionOptions: "all" },
         },
       }}
     >

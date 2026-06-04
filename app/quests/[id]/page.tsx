@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProofSubmissionForm from "@/components/ProofSubmissionForm";
+import CreatorGuardNotice from "@/components/CreatorGuardNotice";
 import { prisma } from "@/lib/prisma";
 
 async function getQuest(id: string) {
@@ -197,13 +198,22 @@ export default async function QuestDetailPage({
                 className="rounded-[18px] p-6"
                 style={{ background: "var(--card)", border: "1px solid var(--border)" }}
               >
+                <CreatorGuardNotice
+                  created_by={quest.created_by}
+                  sponsor_wallet={quest.sponsor_wallet ?? null}
+                />
                 <h2
                   className="font-serif text-lg font-semibold mb-5"
                   style={{ color: "var(--ql-bighorn)" }}
                 >
                   Submit Proof
                 </h2>
-                <ProofSubmissionForm questId={quest.id} questTitle={quest.title} />
+                <ProofSubmissionForm
+                  questId={quest.id}
+                  questTitle={quest.title}
+                  createdBy={quest.created_by}
+                  sponsorWallet={quest.sponsor_wallet ?? null}
+                />
               </div>
             )}
           </div>

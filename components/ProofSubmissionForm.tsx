@@ -8,11 +8,15 @@ import Link from "next/link";
 interface ProofSubmissionFormProps {
   questId: string;
   questTitle: string;
+  createdBy?: string | null;
+  sponsorWallet?: string | null;
 }
 
 export default function ProofSubmissionForm({
   questId,
   questTitle,
+  createdBy,
+  sponsorWallet,
 }: ProofSubmissionFormProps) {
   const { user, authenticated, login } = usePrivy();
   const router = useRouter();
@@ -300,14 +304,27 @@ export default function ProofSubmissionForm({
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full py-4 rounded-full font-semibold text-base transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ background: "#834A1F", color: "#F6F1EA" }}
-      >
-        {submitting ? "Running Proof Checks…" : "Submit Proof"}
-      </button>
+      {(() => {
+        const w = wallet?.toLowerCase();
+        const isCreator = !!w && createdBy?.toLowerCase() === w;
+        const isSponsor = !!w && sponsorWallet?.toLowerCase() === w;
+        const blockedBySelf = isCreator || isSponsor;
+        return (
+          <button
+            type="submit"
+            disabled={submitting || blockedBySelf}
+            title={blockedBySelf ? "You created or sponsored this quest." : undefined}
+            className="w-full py-4 rounded-full font-semibold text-base transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: "#834A1F", color: "#F6F1EA" }}
+          >
+            {blockedBySelf
+              ? "You created or sponsored this quest"
+              : submitting
+              ? "Running Proof Checks…"
+              : "Submit Proof"}
+          </button>
+        );
+      })()}
 
       {submitting && (
         <p className="text-xs text-center" style={{ color: "var(--ql-bear)" }}>

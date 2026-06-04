@@ -43,6 +43,10 @@ model Quest {
   max_claims       Int      @default(100)
   status           String   @default("active")
   created_by       String
+  // v1.1: populated for sponsor-published quests so the creator-guard can
+  // block both the publishing admin and the original sponsor from
+  // participating in their own quest.
+  sponsor_wallet   String?
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 

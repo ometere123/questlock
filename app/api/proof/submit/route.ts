@@ -9,6 +9,7 @@ import { createAttestation } from "@/lib/eas";
 import { approveSubmissionOnchain, rejectSubmissionOnchain } from "@/lib/approval";
 import { log } from "@/lib/logger";
 import { identifyRequest, rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkCreatorGuard, CREATOR_GUARD_ERROR_MESSAGE } from "@/lib/creator-guard";
 
 export async function POST(req: NextRequest) {
   let submissionId: string | null = null;
@@ -64,6 +65,24 @@ export async function POST(req: NextRequest) {
     }
     if (new Date() > quest.deadline) {
       return NextResponse.json({ error: "Quest deadline has passed." }, { status: 400 });
+    }
+
+    // v1.1 creator-guard: block the quest's creator/sponsor from participating
+    // in their own quest. Backend-enforced even if the UI is bypassed.
+    const guard = checkCreatorGuard(walletAddress, {
+      created_by: quest.created_by,
+      sponsor_wallet: quest.sponsor_wallet,
+    });
+    if (guard.blocked) {
+      await log("info", "proof/submit", "Blocked by creator-guard", {
+        questId,
+        walletAddress,
+        reason: guard.reason,
+      });
+      return NextResponse.json(
+        { error: CREATOR_GUARD_ERROR_MESSAGE, blockedBy: guard.reason },
+        { status: 403 }
+      );
     }
 
     // v1.1: GitHub linking is required. Block submission if the wallet has

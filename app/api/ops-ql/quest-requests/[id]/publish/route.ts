@@ -75,6 +75,10 @@ export async function POST(
         max_claims: existing.max_claims,
         onchain_quest_id: onchainQuestId,
         created_by: adminWallet,
+        // v1.1 creator-guard: record the original sponsor so the guard can
+        // block both the publishing admin and the sponsor from submitting
+        // proof for this quest.
+        sponsor_wallet: existing.sponsor_wallet.toLowerCase(),
         status: "active",
       },
     });

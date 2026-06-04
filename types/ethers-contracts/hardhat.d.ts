@@ -11,20 +11,20 @@ import * as Contracts from "./index.js";
 declare module "@nomicfoundation/hardhat-ethers/types" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
   getContractFactory(name: 'QuestBadge', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.QuestBadge__factory>
-getContractFactory(name: 'QuestRewardToken', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.QuestRewardToken__factory>
 getContractFactory(name: 'QuestLockCore', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.QuestLockCore__factory>
+getContractFactory(name: 'QuestRewardToken', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.QuestRewardToken__factory>
 
   getContractAt(name: 'QuestBadge', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.QuestBadge>
-getContractAt(name: 'QuestRewardToken', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.QuestRewardToken>
 getContractAt(name: 'QuestLockCore', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.QuestLockCore>
+getContractAt(name: 'QuestRewardToken', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.QuestRewardToken>
 
   deployContract(name: 'QuestBadge', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestBadge>
-deployContract(name: 'QuestRewardToken', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestRewardToken>
 deployContract(name: 'QuestLockCore', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestLockCore>
+deployContract(name: 'QuestRewardToken', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestRewardToken>
 
   deployContract(name: 'QuestBadge', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestBadge>
-deployContract(name: 'QuestRewardToken', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestRewardToken>
 deployContract(name: 'QuestLockCore', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestLockCore>
+deployContract(name: 'QuestRewardToken', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.QuestRewardToken>
 
     // default types
     getContractFactory(
