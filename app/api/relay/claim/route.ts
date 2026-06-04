@@ -5,6 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 import { CONTRACT_ADDRESSES } from "@/lib/contracts";
 import { log } from "@/lib/logger";
+import { identifyRequest, rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 const CLAIM_ABI = parseAbi([
   "function claimRewardFor(uint256 questId, address user) external",
@@ -22,6 +23,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Missing submissionId or walletAddress." },
         { status: 400 }
+      );
+    }
+
+    const rl = rateLimit(
+      identifyRequest(req, walletAddress),
+      RATE_LIMITS.relayClaim
+    );
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many claim attempts.", retryAfterMs: rl.retryAfterMs },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil((rl.retryAfterMs ?? 0) / 1000)) },
+        }
       );
     }
 

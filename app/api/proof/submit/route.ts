@@ -8,6 +8,7 @@ import { createProofHash, proofHashToBytes32 } from "@/lib/proof-hash";
 import { createAttestation } from "@/lib/eas";
 import { approveSubmissionOnchain, rejectSubmissionOnchain } from "@/lib/approval";
 import { log } from "@/lib/logger";
+import { identifyRequest, rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   let submissionId: string | null = null;
@@ -22,6 +23,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Missing required fields: questId, walletAddress, githubUsername, repoUrl." },
         { status: 400 }
+      );
+    }
+
+    // Rate limit by wallet (falls back to IP if missing)
+    const rl = rateLimit(
+      identifyRequest(req, walletAddress),
+      RATE_LIMITS.proofSubmit
+    );
+    if (!rl.allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many proof submissions. Please try again later.",
+          retryAfterMs: rl.retryAfterMs,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil((rl.retryAfterMs ?? 0) / 1000)) },
+        }
       );
     }
 

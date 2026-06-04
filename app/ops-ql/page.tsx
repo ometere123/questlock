@@ -27,6 +27,24 @@ interface Submission {
   quest: { title: string };
 }
 
+interface SystemStatus {
+  env: { ok: boolean; required_missing: string[]; optional_missing: string[] };
+  submissions: { by_status: Array<{ status: string; count: number }> };
+  indexer: {
+    last_block: string | null;
+    last_event: string | null;
+    last_event_at: string | null;
+    total_events: number;
+  };
+  logs: Array<{
+    id: string;
+    level: string;
+    source: string;
+    message: string;
+    created_at: string;
+  }>;
+}
+
 function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
   const { user } = usePrivy();
   const [form, setForm] = useState({
@@ -185,15 +203,19 @@ export default function AdminPage() {
   const { authenticated, user, login } = usePrivy();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [tab, setTab] = useState<"quests" | "submissions" | "create">("quests");
+  const [tab, setTab] = useState<"quests" | "submissions" | "create" | "system">("quests");
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
 
   async function loadData() {
-    const [qRes, sRes] = await Promise.all([
-      fetch("/api/admin/quests", { headers: { "x-wallet-address": user?.wallet?.address || "" } }),
-      fetch("/api/admin/submissions", { headers: { "x-wallet-address": user?.wallet?.address || "" } }),
+    const headers = { "x-wallet-address": user?.wallet?.address || "" };
+    const [qRes, sRes, sysRes] = await Promise.all([
+      fetch("/api/admin/quests", { headers }),
+      fetch("/api/admin/submissions", { headers }),
+      fetch("/api/ops-ql/system-status", { headers }),
     ]);
     if (qRes.ok) setQuests(await qRes.json());
     if (sRes.ok) setSubmissions(await sRes.json());
+    if (sysRes.ok) setSystemStatus(await sysRes.json());
   }
 
   useEffect(() => {
@@ -227,6 +249,7 @@ export default function AdminPage() {
     { key: "quests", label: "Quests" },
     { key: "submissions", label: "Submissions" },
     { key: "create", label: "Create Quest" },
+    { key: "system", label: "System" },
   ] as const;
 
   return (
@@ -340,6 +363,115 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* System */}
+        {tab === "system" && (
+          <div className="space-y-6">
+            {!systemStatus ? (
+              <p className="text-sm" style={{ color: "var(--ql-cafe)" }}>Loading…</p>
+            ) : (
+              <>
+                {/* Env audit */}
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>Environment</p>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                      style={systemStatus.env.ok
+                        ? { background: "#2D5A2D", color: "#F6F1EA" }
+                        : { background: "#6B3838", color: "#F0DADA" }}>
+                      {systemStatus.env.ok ? "OK" : "MISSING REQUIRED"}
+                    </span>
+                  </div>
+                  {systemStatus.env.required_missing.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs mb-1" style={{ color: "#F0DADA" }}>Required missing:</p>
+                      <p className="font-mono text-xs" style={{ color: "#F0DADA" }}>
+                        {systemStatus.env.required_missing.join(", ")}
+                      </p>
+                    </div>
+                  )}
+                  {systemStatus.env.optional_missing.length > 0 && (
+                    <div>
+                      <p className="text-xs mb-1" style={{ color: "var(--ql-cafe)" }}>Optional missing:</p>
+                      <p className="font-mono text-xs" style={{ color: "var(--ql-cafe)" }}>
+                        {systemStatus.env.optional_missing.join(", ")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Indexer status */}
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Indexer</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Last block</p>
+                      <p className="font-mono" style={{ color: "#F6F1EA" }}>{systemStatus.indexer.last_block ?? "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Last event</p>
+                      <p style={{ color: "#F6F1EA" }}>{systemStatus.indexer.last_event ?? "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Last seen</p>
+                      <p className="text-xs" style={{ color: "#F6F1EA" }}>
+                        {systemStatus.indexer.last_event_at
+                          ? new Date(systemStatus.indexer.last_event_at).toLocaleString()
+                          : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Total events</p>
+                      <p className="font-mono" style={{ color: "#F6F1EA" }}>{systemStatus.indexer.total_events}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submission counts */}
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Submissions by status</p>
+                  <div className="flex flex-wrap gap-3">
+                    {systemStatus.submissions.by_status.map((s) => (
+                      <div key={s.status} className="px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+                        <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>{s.status}</p>
+                        <p className="font-mono font-bold" style={{ color: "#F6F1EA" }}>{s.count}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recent logs */}
+                <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid rgba(169,140,117,0.15)" }}>
+                  <div className="px-5 py-3" style={{ background: "var(--ql-night)" }}>
+                    <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>Recent logs</p>
+                  </div>
+                  {systemStatus.logs.length === 0 ? (
+                    <p className="px-5 py-6 text-sm text-center" style={{ background: "rgba(255,255,255,0.02)", color: "var(--ql-bear)" }}>
+                      No logs yet.
+                    </p>
+                  ) : (
+                    <div style={{ background: "rgba(255,255,255,0.02)" }}>
+                      {systemStatus.logs.map((l, i) => (
+                        <div key={l.id} className="px-5 py-2 flex gap-3 text-xs"
+                          style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.08)" : undefined }}>
+                          <span className="font-mono shrink-0 uppercase font-semibold w-12"
+                            style={{ color: l.level === "error" ? "#F0DADA" : l.level === "warn" ? "#F0C97D" : "var(--ql-cafe)" }}>
+                            {l.level}
+                          </span>
+                          <span className="shrink-0 w-24 truncate" style={{ color: "var(--ql-cafe)" }}>{l.source}</span>
+                          <span className="flex-1" style={{ color: "#F6F1EA" }}>{l.message}</span>
+                          <span className="shrink-0" style={{ color: "var(--ql-bear)" }}>
+                            {new Date(l.created_at).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -113,6 +113,15 @@ User submits GitHub proof
 | `GET /api/admin/submissions` | Admin submission list |
 | `GET /api/ops-ql/submissions/[id]` | Admin submission detail |
 | `POST /api/indexer` | Manually trigger event indexer (needs `x-indexer-secret`) |
+| `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
+| `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
+
+## v1.1 ops hardening (this branch)
+
+- `lib/env.ts` — `requireEnv()` / `auditEnv()` validate required vs optional env vars at startup. Use `requireEnv` in any code path that needs a server secret.
+- `lib/rate-limit.ts` — in-process token-bucket limiter wired into `/api/proof/submit` and `/api/relay/claim`. **Best-effort:** state is held in module memory and resets on server restart / serverless cold start. Swap to a Supabase-backed store if you need durability.
+- `/api/health` — JSON status with env audit, DB ping latency, RPC tip block. Returns HTTP 503 if any required env var is missing or DB/RPC is unreachable.
+- `/ops-ql` System tab — env audit, indexer status (last block, last event, total events), live submission counts grouped by status, last 25 system log lines.
 
 ## Proof Checks (100 pts, 70 to pass)
 
