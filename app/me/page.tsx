@@ -257,6 +257,14 @@ export default function ProfilePage() {
                               Claim reward →
                             </Link>
                           )}
+                          {["APPROVED_ONCHAIN", "CLAIMING", "CLAIMED", "ATTESTED"].includes(s.status) && (
+                            <Link
+                              href={`/proof/${s.id}`}
+                              style={{ color: "#834A1F" }}
+                            >
+                              Public proof →
+                            </Link>
+                          )}
                         </div>
                       </div>
                     ))}

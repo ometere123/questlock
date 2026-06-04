@@ -116,6 +116,15 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 public proof / certificate pages
+
+- `/proof/[submissionId]` is a public, shareable certificate page. No auth required.
+- Only submissions in `ATTESTED`, `APPROVED_ONCHAIN`, `CLAIMING`, or `CLAIMED` are visible — failed and in-progress submissions 404.
+- The whitelist of exposed fields lives in `lib/public-proof.ts` (`toPublicProof`) — explanation, raw failure reasons, and any other private signal is never serialised into the public payload.
+- The page renders quest title + subject (GitHub login if linked, else short wallet), score, risk band, badge, repo + demo links, EAS attestation, approval tx, claim tx, proof hash and per-check pass/fail.
+- API: `GET /api/proof/public/[id]` mirrors the same data with the same whitelist for machine-readable use.
+- OpenGraph metadata is generated per-proof so the link previews nicely on Twitter / Telegram / Slack.
+
 ## v1.1 GitHub account linking
 
 - New columns on `users`: `github_id`, `github_login`, `github_avatar_url`, `github_profile_url`, `github_connected_at` (unique on id + login).

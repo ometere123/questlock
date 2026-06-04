@@ -220,13 +220,22 @@ export default function SubmitResultPage() {
                 <p className="text-sm mb-4" style={{ color: "var(--ql-cafe)" }}>
                   Tokens and badge have been delivered to your wallet.
                 </p>
-                <Link
-                  href="/me"
-                  className="inline-block px-6 py-2.5 rounded-full text-sm font-medium"
-                  style={{ background: "#834A1F", color: "#F6F1EA" }}
-                >
-                  View Profile →
-                </Link>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Link
+                    href={`/proof/${data.id}`}
+                    className="inline-block px-6 py-2.5 rounded-full text-sm font-medium"
+                    style={{ background: "#834A1F", color: "#F6F1EA" }}
+                  >
+                    Share Public Proof →
+                  </Link>
+                  <Link
+                    href="/me"
+                    className="inline-block px-6 py-2.5 rounded-full text-sm font-medium"
+                    style={{ background: "rgba(255,255,255,0.08)", color: "#F6F1EA" }}
+                  >
+                    View Profile
+                  </Link>
+                </div>
               </div>
             )}
           </div>
