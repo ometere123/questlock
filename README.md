@@ -116,7 +116,17 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
-## v1.1 ops hardening (this branch)
+## v1.1 GitHub account linking
+
+- New columns on `users`: `github_id`, `github_login`, `github_avatar_url`, `github_profile_url`, `github_connected_at` (unique on id + login).
+- OAuth flow: `POST /api/auth/github/start` → user redirected to GitHub → `GET /api/auth/github/callback` → user redirected to `/me?github=...`.
+- `GET /api/auth/github/status?wallet=` reports link state. `POST /api/auth/github/disconnect` clears it.
+- State token is an HMAC-signed `body.signature` carrying `{wallet, nonce, exp}`; signed with `INDEXER_SECRET` (or `VERIFIER_PRIVATE_KEY` as a fallback). Tokens expire after 10 minutes.
+- Access tokens are exchanged server-side and discarded immediately after the `/user` lookup — they never reach the browser.
+- Proof submission requires a linked GitHub account and rejects submissions whose repository owner does not exactly match the linked login.
+- Need a GitHub OAuth App: create one at https://github.com/settings/developers with Authorization callback URL set to `${NEXT_PUBLIC_APP_URL}/api/auth/github/callback`. Fill `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `GITHUB_OAUTH_REDIRECT_URI` in `.env`.
+
+## v1.1 ops hardening
 
 - `lib/env.ts` — `requireEnv()` / `auditEnv()` validate required vs optional env vars at startup. Use `requireEnv` in any code path that needs a server secret.
 - `lib/rate-limit.ts` — in-process token-bucket limiter wired into `/api/proof/submit` and `/api/relay/claim`. **Best-effort:** state is held in module memory and resets on server restart / serverless cold start. Swap to a Supabase-backed store if you need durability.

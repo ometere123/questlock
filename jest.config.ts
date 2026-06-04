@@ -10,7 +10,7 @@ const config: Config = {
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.scripts.json" }],
   },
-  testPathIgnorePatterns: ["/node_modules/", "/test/QuestLockCore.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/test/contracts/"],
 };
 
 export default config;

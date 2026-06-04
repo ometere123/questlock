@@ -66,6 +66,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Quest deadline has passed." }, { status: 400 });
     }
 
+    // v1.1: GitHub linking is required. Block submission if the wallet has
+    // not linked a GitHub account, and require the submitted GitHub
+    // username + repo owner to match the linked github_login exactly.
+    const linkedUser = await prisma.user.findUnique({
+      where: { wallet_address: walletAddress.toLowerCase() },
+      select: { github_login: true },
+    });
+    if (!linkedUser?.github_login) {
+      return NextResponse.json(
+        {
+          error: "Connect GitHub before submitting proof.",
+          requiresGithubLink: true,
+        },
+        { status: 403 }
+      );
+    }
+    const linkedLogin = linkedUser.github_login.toLowerCase();
+    if (githubUsername.toLowerCase() !== linkedLogin) {
+      return NextResponse.json(
+        {
+          error: `Submitted GitHub username must match your linked account (@${linkedUser.github_login}).`,
+        },
+        { status: 400 }
+      );
+    }
+    if (parsed.owner.toLowerCase() !== linkedLogin) {
+      return NextResponse.json(
+        {
+          error: `Repository owner (${parsed.owner}) must match your linked GitHub account (@${linkedUser.github_login}).`,
+        },
+        { status: 400 }
+      );
+    }
+
     // Check for existing submission
     const existing = await prisma.submission.findUnique({
       where: { quest_id_wallet_address: { quest_id: questId, wallet_address: walletAddress } },
@@ -77,7 +111,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert user FIRST (submission has FK on wallet_address)
+    // Upsert user FIRST (submission has FK on wallet_address) — preserve linked
+    // GitHub fields and only sync the legacy free-text github_username.
     await prisma.user.upsert({
       where: { wallet_address: walletAddress },
       update: { github_username: githubUsername },

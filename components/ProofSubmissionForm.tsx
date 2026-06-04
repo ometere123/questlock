@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface ProofSubmissionFormProps {
   questId: string;
@@ -16,12 +17,37 @@ export default function ProofSubmissionForm({
   const { user, authenticated, login } = usePrivy();
   const router = useRouter();
 
+  const wallet = user?.wallet?.address;
+
+  const [githubStatus, setGithubStatus] = useState<{
+    connected: boolean;
+    github_login?: string;
+  } | null>(null);
+
   const [form, setForm] = useState({
     githubUsername: "",
     repoUrl: "",
     demoUrl: "",
     explanation: "",
   });
+
+  // Pull the user's GitHub link status whenever the wallet changes so we can
+  // prefill the username field and block the form if they have not linked.
+  useEffect(() => {
+    if (!wallet) {
+      setGithubStatus(null);
+      return;
+    }
+    fetch(`/api/auth/github/status?wallet=${wallet}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        setGithubStatus(d);
+        if (d?.connected && d.github_login) {
+          setForm((f) => ({ ...f, githubUsername: d.github_login }));
+        }
+      })
+      .catch(() => setGithubStatus({ connected: false }));
+  }, [wallet]);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
     submissionId?: string;
@@ -108,6 +134,31 @@ export default function ProofSubmissionForm({
     );
   }
 
+  // Block submission until GitHub is linked (v1.1 requirement).
+  if (githubStatus && githubStatus.connected === false) {
+    return (
+      <div
+        className="rounded-[18px] p-8 text-center"
+        style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <p className="font-serif text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>
+          Connect GitHub before submitting proof
+        </p>
+        <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+          QuestLock verifies that the repository owner matches your linked GitHub
+          account. Link your account once on your profile, then come back.
+        </p>
+        <Link
+          href="/me"
+          className="inline-block px-6 py-3 rounded-full font-medium text-sm"
+          style={{ background: "#22150C", color: "#F6F1EA" }}
+        >
+          Connect GitHub on Profile →
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
@@ -122,13 +173,19 @@ export default function ProofSubmissionForm({
           value={form.githubUsername}
           onChange={(e) => setForm({ ...form, githubUsername: e.target.value })}
           placeholder="your-github-username"
+          readOnly={Boolean(githubStatus?.connected)}
           className="w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2"
           style={{
-            background: "var(--card)",
+            background: githubStatus?.connected ? "var(--muted)" : "var(--card)",
             border: `1px solid ${errors.githubUsername ? "#7A2020" : "var(--ql-cafe)"}`,
             color: "var(--ql-bighorn)",
           }}
         />
+        {githubStatus?.connected && (
+          <p className="text-xs mt-1" style={{ color: "var(--ql-bear)" }}>
+            Locked to your linked GitHub account @{githubStatus.github_login}.
+          </p>
+        )}
         {errors.githubUsername && (
           <p className="text-xs mt-1" style={{ color: "#7A2020" }}>
             {errors.githubUsername}

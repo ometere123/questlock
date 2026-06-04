@@ -9,11 +9,17 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  wallet_address String   @unique
+  id              String   @id @default(uuid())
+  wallet_address  String   @unique
   github_username String?
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  // GitHub OAuth linking (v1.1)
+  github_id           String?  @unique
+  github_login        String?  @unique
+  github_avatar_url   String?
+  github_profile_url  String?
+  github_connected_at DateTime?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   submissions Submission[]
 
