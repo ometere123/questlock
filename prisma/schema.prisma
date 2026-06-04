@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  wallet_address String   @unique
+  github_username String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  submissions Submission[]
+
+  @@map("users")
+}
+
+model Quest {
+  id               String   @id @default(uuid())
+  onchain_quest_id BigInt?
+  title            String
+  description      String
+  quest_type       String   @default("github_project")
+  requirements_json Json    @default("{}")
+  scoring_rubric_json Json  @default("{}")
+  min_score        Int      @default(70)
+  reward_amount    String
+  reward_token_address String?
+  badge_id         BigInt   @default(1)
+  start_time       DateTime
+  deadline         DateTime
+  max_claims       Int      @default(100)
+  status           String   @default("active")
+  created_by       String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  submissions    Submission[]
+  duplicate_entries DuplicateIndex[]
+
+  @@map("quests")
+}
+
+model Submission {
+  id               String   @id @default(uuid())
+  quest_id         String
+  wallet_address   String
+  github_username  String
+  repo_url         String
+  demo_url         String?
+  explanation      String?
+  proof_hash       String?
+  score            Int?
+  risk_band        String?
+  status           String   @default("SUBMITTED")
+  failure_reasons_json Json @default("[]")
+  eas_attestation_uid  String?
+  tx_hash_approval     String?
+  tx_hash_claim        String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  quest       Quest        @relation(fields: [quest_id], references: [id])
+  user        User?        @relation(fields: [wallet_address], references: [wallet_address])
+  proof_checks ProofCheck[]
+
+  @@unique([quest_id, wallet_address])
+  @@map("submissions")
+}
+
+model ProofCheck {
+  id            String   @id @default(uuid())
+  submission_id String
+  check_name    String
+  passed        Boolean
+  points_awarded Int
+  max_points    Int
+  details_json  Json     @default("{}")
+  created_at    DateTime @default(now())
+
+  submission Submission @relation(fields: [submission_id], references: [id])
+
+  @@map("proof_checks")
+}
+
+model DuplicateIndex {
+  id                   String   @id @default(uuid())
+  quest_id             String
+  repo_url_hash        String?
+  github_username_hash String?
+  demo_url_hash        String?
+  wallet_address       String
+  submission_id        String
+  created_at           DateTime @default(now())
+
+  quest Quest @relation(fields: [quest_id], references: [id])
+
+  @@map("duplicate_index")
+}
+
+model ContractEvent {
+  id           String   @id @default(uuid())
+  event_name   String
+  tx_hash      String
+  block_number BigInt
+  quest_id     String?
+  wallet_address String?
+  payload_json Json     @default("{}")
+  created_at   DateTime @default(now())
+
+  @@map("contract_events")
+}
+
+model SystemLog {
+  id            String   @id @default(uuid())
+  level         String
+  source        String
+  message       String
+  metadata_json Json     @default("{}")
+  created_at    DateTime @default(now())
+
+  @@map("system_logs")
+}
