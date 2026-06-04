@@ -8,8 +8,8 @@
 - A funded Base Sepolia wallet (deployer)
 - A second wallet for the verifier role
 - Privy account (app ID)
-- Gelato Cloud account (API key)
 - GitHub Personal Access Token (for API rate limits)
+- GitHub OAuth App (for v1.1 account linking) — Authorization callback `${NEXT_PUBLIC_APP_URL}/api/auth/github/callback`
 
 ## 1. Install dependencies
 
@@ -37,7 +37,9 @@ Fill in `.env`:
 | `DEPLOYER_PRIVATE_KEY` | Your deployer wallet private key |
 | `VERIFIER_PRIVATE_KEY` | Your verifier wallet private key |
 | `BASE_SEPOLIA_RPC_URL` | `https://sepolia.base.org` (or Alchemy/Infura) |
-| `GELATO_API_KEY` | app.gelato.cloud |
+| `GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` / `GITHUB_OAUTH_REDIRECT_URI` | github.com/settings/developers → OAuth App |
+| `DIRECT_URL` | Same Supabase URL but unpooled, used by Prisma Migrate |
+| `INDEXER_SECRET` | Random hex; signs OAuth state and gates `/api/indexer` |
 | `ADMIN_WALLET_ADDRESS` | Your admin wallet address |
 
 ## 3. Set up Supabase

@@ -25,7 +25,7 @@ export default function LandingPage() {
     {
       step: "05",
       title: "Claim reward gaslessly",
-      desc: "Gelato Relay submits the claim transaction. No ETH needed.",
+      desc: "QuestLock's verifier submits the claim transaction. You sign nothing and pay no gas.",
     },
     {
       step: "06",
@@ -221,7 +221,7 @@ export default function LandingPage() {
               ["Deterministic checks", "No AI. No subjectivity. Pure objective rules."],
               ["EAS Attestations", "Public-safe proof results on Base Sepolia."],
               ["Anti-farm rules", "Duplicate detection prevents reward farming."],
-              ["Gasless claiming", "Gelato Relay sponsors gas for reward claims."],
+              ["Gasless claim from the user's perspective", "QuestLock's verifier wallet signs and pays the claim transaction. No wallet signature, no ETH from you."],
             ].map(([title, desc]) => (
               <div
                 key={title}
