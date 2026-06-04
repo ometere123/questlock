@@ -122,6 +122,41 @@ model ContractEvent {
   @@map("contract_events")
 }
 
+model QuestRequest {
+  id                   String   @id @default(uuid())
+  // sponsor-supplied details
+  title                String
+  description          String
+  requirements         String?
+  reward_amount        String
+  reward_token_address String?
+  badge_id             Int      @default(1)
+  min_score            Int      @default(70)
+  max_claims           Int      @default(100)
+  deadline_days        Int      @default(30)
+  // sponsor identity
+  sponsor_name    String?
+  sponsor_email   String?
+  sponsor_wallet  String
+  // lifecycle: PENDING_REVIEW | APPROVED | REJECTED | PUBLISHING | PUBLISHED | PUBLISH_FAILED
+  status              String   @default("PENDING_REVIEW")
+  admin_notes         String?
+  rejection_reason    String?
+  // publish artefacts
+  onchain_quest_id   BigInt?
+  published_quest_id String?
+  publish_tx_hash    String?
+  publish_error      String?
+  published_at       DateTime?
+  // audit
+  reviewed_by String?
+  reviewed_at DateTime?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("quest_requests")
+}
+
 model SystemLog {
   id            String   @id @default(uuid())
   level         String

@@ -116,6 +116,21 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 sponsor / creator quest requests
+
+- `quest_requests` table holds offchain submissions from sponsors with the lifecycle: `PENDING_REVIEW → APPROVED → PUBLISHING → PUBLISHED`. Branches: `REJECTED`, `PUBLISH_FAILED` (retryable).
+- Public form at **`/create`** lets any connected wallet propose a quest. Sponsors can revisit `/create` to see their own requests, statuses and rejection reasons.
+- Admin review queue at **`/ops-ql/quest-requests`** (gated to `ADMIN_WALLET_ADDRESS`). Two-step admin flow:
+  1. **Approve** offchain — no gas spent.
+  2. **Publish onchain** — separate explicit click, calls `QuestLockCore.createQuest` via the deployer wallet (which holds `QUEST_CREATOR_ROLE`), parses the `QuestCreated` event for the new `onchainQuestId`, inserts a `quests` row tied to that id, and marks the request `PUBLISHED`.
+- Publish failures land in `PUBLISH_FAILED` with the error captured in `publish_error`; admin can retry without re-submitting.
+- API:
+  - `POST /api/quest-requests` (public, rate-limited 3/min per wallet)
+  - `GET  /api/quest-requests?wallet=` (sponsor's own list)
+  - `GET  /api/ops-ql/quest-requests` (admin list)
+  - `POST /api/ops-ql/quest-requests/[id]/approve|reject|publish` (admin actions)
+- Random users cannot publish quests directly in v1.1 — only admin approval + admin publish creates onchain quests.
+
 ## v1.1 public proof / certificate pages
 
 - `/proof/[submissionId]` is a public, shareable certificate page. No auth required.

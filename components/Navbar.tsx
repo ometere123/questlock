@@ -47,6 +47,13 @@ export default function Navbar() {
           >
             Quests
           </Link>
+          <Link
+            href="/create"
+            className="text-sm font-medium transition-colors"
+            style={{ color: "var(--ql-ashen)" }}
+          >
+            Create
+          </Link>
           {authenticated && (
             <>
               <Link
@@ -57,13 +64,22 @@ export default function Navbar() {
                 Profile
               </Link>
               {user?.wallet?.address?.toLowerCase() === "0x1f63ea74065586af0c7c48428372d88d0a89525b" && (
-                <Link
-                  href="/ops-ql"
-                  className="text-sm font-medium"
-                  style={{ color: "var(--ql-cafe)" }}
-                >
-                  Admin
-                </Link>
+                <>
+                  <Link
+                    href="/ops-ql"
+                    className="text-sm font-medium"
+                    style={{ color: "var(--ql-cafe)" }}
+                  >
+                    Admin
+                  </Link>
+                  <Link
+                    href="/ops-ql/quest-requests"
+                    className="text-sm font-medium"
+                    style={{ color: "var(--ql-cafe)" }}
+                  >
+                    Requests
+                  </Link>
+                </>
               )}
             </>
           )}
