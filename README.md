@@ -116,6 +116,25 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 manual review / appeals queue
+
+- New `submission_appeals` table with one-appeal-per-submission constraint. Lifecycle: `PENDING → PROCESSING → APPROVED | REJECTED | APPROVE_FAILED` (the last is retryable).
+- Failed-proof view (`/submit/[questId]?submissionId=…`) now shows an "Request review" CTA only to the submitting wallet. After submission the same panel shows the appeal status + admin notes.
+- Admin review queue at **`/ops-ql/appeals`** lists every appeal with quest title, submitter wallet/GitHub, original score vs minimum, the user's appeal reason, the original failure reasons, repo + demo links, and an inline link to the full submission detail.
+- **Approve** runs `lib/appeal-approve.ts`:
+  1. Re-uses the existing `proof_hash` if present, otherwise mints a fresh deterministic hash.
+  2. Issues an EAS attestation tagged `riskBand = "MANUAL_REVIEW"` so the public certificate is transparent about the override.
+  3. Calls the existing `submitAndApprove(questId, user, proofHash, attestationUID, score)` via the verifier wallet — same path v1 uses. **No contract redeploy was required.**
+  4. The onchain score is lifted to `max(score, minScore)` to clear the contract's score floor; the actual deterministic score remains in the EAS attestation.
+  5. Updates the submission to `APPROVED_ONCHAIN` with `risk_band = "MANUAL_REVIEW"` so the existing claim button appears for the user.
+- **Reject** marks the appeal closed without touching onchain state.
+- **Known limitation** (per spec): the existing contract has no path to flip an onchain `REJECTED` submission into `APPROVED`. In v1 the verifier never calls `rejectSubmission` for failed offchain proofs (failures terminate before going onchain), so this affects nothing today. If a future change starts rejecting onchain we will need a contract update.
+- API:
+  - `POST /api/appeals` (user, rate-limited 2/min) — body `{ submissionId, walletAddress, reason }`
+  - `GET  /api/appeals?wallet=` — user's own appeals
+  - `GET  /api/ops-ql/appeals` — admin queue
+  - `POST /api/ops-ql/appeals/[id]/approve|reject` — admin actions
+
 ## v1.1 sponsor / creator quest requests
 
 - `quest_requests` table holds offchain submissions from sponsors with the lifecycle: `PENDING_REVIEW → APPROVED → PUBLISHING → PUBLISHED`. Branches: `REJECTED`, `PUBLISH_FAILED` (retryable).

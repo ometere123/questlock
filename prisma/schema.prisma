@@ -74,9 +74,34 @@ model Submission {
   quest       Quest        @relation(fields: [quest_id], references: [id])
   user        User?        @relation(fields: [wallet_address], references: [wallet_address])
   proof_checks ProofCheck[]
+  appeal      SubmissionAppeal?
 
   @@unique([quest_id, wallet_address])
   @@map("submissions")
+}
+
+model SubmissionAppeal {
+  id              String   @id @default(uuid())
+  submission_id   String   @unique
+  wallet_address  String
+  reason          String
+  // PENDING | APPROVED | REJECTED | PROCESSING | APPROVE_FAILED
+  status          String   @default("PENDING")
+  admin_notes     String?
+  reviewed_by     String?
+  reviewed_at     DateTime?
+  // approval outcome (when status === APPROVED)
+  attestation_uid  String?
+  tx_hash_approval String?
+  approve_error    String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  submission Submission @relation(fields: [submission_id], references: [id])
+
+  @@index([status])
+  @@index([wallet_address])
+  @@map("submission_appeals")
 }
 
 model ProofCheck {

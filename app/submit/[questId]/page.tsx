@@ -7,6 +7,7 @@ import ScoreBreakdown from "@/components/ScoreBreakdown";
 import AttestationCard from "@/components/AttestationCard";
 import GaslessClaimButton from "@/components/GaslessClaimButton";
 import StatusBadge from "@/components/StatusBadge";
+import AppealCTA from "@/components/AppealCTA";
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 
@@ -170,6 +171,15 @@ export default function SubmitResultPage() {
                 </ul>
               </div>
             )}
+
+            {/* Appeal CTA — only when this is the submitter's own failed proof */}
+            {["FAILED", "REJECTED"].includes(data.status) &&
+              user?.wallet?.address && (
+                <AppealCTA
+                  submissionId={data.id}
+                  walletAddress={user.wallet.address}
+                />
+              )}
 
             {/* Attestation */}
             {data.easAttestationUid && !data.easAttestationUid.includes("0".repeat(32)) && (
