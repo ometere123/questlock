@@ -127,3 +127,69 @@ export function potentialOutflowRemaining(args: {
   if (!Number.isFinite(reward)) return "0";
   return String(slotsLeft * reward);
 }
+
+export type PoolCoverageStatus = "fully_covered" | "underfunded_warning" | "needs_topup";
+
+export interface PoolCoverage {
+  pool_balance: string;          // current QuestLockCore QUEST balance (string for precision)
+  total_max_payout: string;      // sum of per-quest max payouts if every remaining slot fills
+  coverage_ratio: number | null; // pool_balance / total_max_payout, null when total_max_payout = 0
+  coverage_pct: number | null;   // coverage_ratio * 100, rounded to 1 dp
+  shortfall: string;             // max(0, total_max_payout - pool_balance)
+  status: PoolCoverageStatus | null;
+}
+
+// QuestLockCore uses a single shared QUEST pool. This helper rolls up every
+// per-quest "max payout if fully claimed" and compares it against the live
+// pool balance so the admin can spot when the contract needs a top-up.
+//
+// Status thresholds (per spec):
+//   >= 100%  fully_covered
+//   75–99%   underfunded_warning
+//   < 75%    needs_topup
+//
+// null pool_balance (e.g. RPC unreachable) returns null status without throwing.
+export function computePoolCoverage(args: {
+  poolBalance: string | null;
+  perQuestMaxPayouts: string[];
+}): PoolCoverage {
+  const totalMax = args.perQuestMaxPayouts.reduce((sum, v) => {
+    const n = Number(v);
+    return sum + (Number.isFinite(n) ? n : 0);
+  }, 0);
+
+  const balance = args.poolBalance !== null ? Number(args.poolBalance) : NaN;
+  const balanceValid = Number.isFinite(balance);
+
+  let coverage_ratio: number | null = null;
+  let coverage_pct: number | null = null;
+  let shortfall = 0;
+  let status: PoolCoverageStatus | null = null;
+
+  if (balanceValid && totalMax > 0) {
+    coverage_ratio = balance / totalMax;
+    coverage_pct = Math.round(coverage_ratio * 1000) / 10;
+    shortfall = Math.max(0, totalMax - balance);
+    status =
+      coverage_ratio >= 1
+        ? "fully_covered"
+        : coverage_ratio >= 0.75
+        ? "underfunded_warning"
+        : "needs_topup";
+  } else if (balanceValid && totalMax === 0) {
+    // No active obligations — coverage is undefined but the pool is fine.
+    coverage_ratio = null;
+    coverage_pct = null;
+    shortfall = 0;
+    status = "fully_covered";
+  }
+
+  return {
+    pool_balance: args.poolBalance ?? "0",
+    total_max_payout: String(totalMax),
+    coverage_ratio,
+    coverage_pct,
+    shortfall: String(shortfall),
+    status,
+  };
+}

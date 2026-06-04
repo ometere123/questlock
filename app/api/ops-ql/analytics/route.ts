@@ -5,6 +5,7 @@ import { baseSepolia } from "viem/chains";
 import { CONTRACT_ADDRESSES } from "@/lib/contracts";
 import {
   aggregateQuestAnalytics,
+  computePoolCoverage,
   potentialOutflowRemaining,
 } from "@/lib/analytics";
 import { serializeBigInt } from "@/lib/bigint";
@@ -103,10 +104,21 @@ export async function GET(req: NextRequest) {
       .slice(0, 8)
       .map(([reason, count]) => ({ reason, count }));
 
+    // Pool coverage: roll up every active quest's max payout against the live
+    // QuestLockCore balance so the admin can spot underfunding.
+    const activeMaxPayouts = perQuest
+      .filter((q) => q.status === "active")
+      .map((q) => q.potential_outflow_remaining);
+    const poolCoverage = computePoolCoverage({
+      poolBalance: rewardPoolBalance,
+      perQuestMaxPayouts: activeMaxPayouts,
+    });
+
     return NextResponse.json(
       serializeBigInt({
         generated_at: new Date().toISOString(),
         reward_pool_balance: rewardPoolBalance,
+        pool_coverage: poolCoverage,
         global: {
           total_quests: quests.length,
           total_submissions: totalSubmissions,

@@ -1,5 +1,6 @@
 import {
   aggregateQuestAnalytics,
+  computePoolCoverage,
   potentialOutflowRemaining,
 } from "../../lib/analytics";
 
@@ -99,5 +100,95 @@ describe("potentialOutflowRemaining", () => {
     expect(
       potentialOutflowRemaining({ maxClaims: 5, totalClaims: 10, rewardAmount: "10" })
     ).toBe("0");
+  });
+});
+
+describe("computePoolCoverage", () => {
+  test("fully_covered when balance >= total max payout", () => {
+    const c = computePoolCoverage({
+      poolBalance: "1500",
+      perQuestMaxPayouts: ["500", "500"],
+    });
+    expect(c.coverage_pct).toBe(150);
+    expect(c.shortfall).toBe("0");
+    expect(c.status).toBe("fully_covered");
+  });
+
+  test("underfunded_warning when coverage in [75%, 100%)", () => {
+    const c = computePoolCoverage({
+      poolBalance: "800",
+      perQuestMaxPayouts: ["1000"],
+    });
+    expect(c.coverage_pct).toBe(80);
+    expect(c.shortfall).toBe("200");
+    expect(c.status).toBe("underfunded_warning");
+  });
+
+  test("needs_topup when coverage < 75%", () => {
+    const c = computePoolCoverage({
+      poolBalance: "500",
+      perQuestMaxPayouts: ["1000"],
+    });
+    expect(c.coverage_pct).toBe(50);
+    expect(c.shortfall).toBe("500");
+    expect(c.status).toBe("needs_topup");
+  });
+
+  test("example from spec: 990 / 1240 → 79.8% underfunded", () => {
+    const c = computePoolCoverage({
+      poolBalance: "990",
+      perQuestMaxPayouts: ["250", "990"],
+    });
+    expect(c.coverage_pct).toBe(79.8);
+    expect(c.shortfall).toBe("250");
+    expect(c.status).toBe("underfunded_warning");
+  });
+
+  test("boundary: exactly 100% is fully_covered", () => {
+    const c = computePoolCoverage({
+      poolBalance: "1000",
+      perQuestMaxPayouts: ["1000"],
+    });
+    expect(c.status).toBe("fully_covered");
+    expect(c.shortfall).toBe("0");
+  });
+
+  test("boundary: exactly 75% is underfunded_warning, just below is needs_topup", () => {
+    expect(
+      computePoolCoverage({ poolBalance: "750", perQuestMaxPayouts: ["1000"] }).status
+    ).toBe("underfunded_warning");
+    expect(
+      computePoolCoverage({ poolBalance: "749", perQuestMaxPayouts: ["1000"] }).status
+    ).toBe("needs_topup");
+  });
+
+  test("no active obligations → fully_covered with null ratio", () => {
+    const c = computePoolCoverage({
+      poolBalance: "1000",
+      perQuestMaxPayouts: [],
+    });
+    expect(c.status).toBe("fully_covered");
+    expect(c.coverage_ratio).toBeNull();
+    expect(c.coverage_pct).toBeNull();
+    expect(c.shortfall).toBe("0");
+  });
+
+  test("null poolBalance (e.g. RPC unreachable) → null status, no throw", () => {
+    const c = computePoolCoverage({
+      poolBalance: null,
+      perQuestMaxPayouts: ["1000"],
+    });
+    expect(c.status).toBeNull();
+    expect(c.coverage_ratio).toBeNull();
+    expect(c.coverage_pct).toBeNull();
+  });
+
+  test("ignores non-numeric per-quest values defensively", () => {
+    const c = computePoolCoverage({
+      poolBalance: "1000",
+      perQuestMaxPayouts: ["500", "garbage", "500"],
+    });
+    expect(c.coverage_pct).toBe(100);
+    expect(c.status).toBe("fully_covered");
   });
 });

@@ -33,9 +33,19 @@ interface QuestRow {
   potential_outflow_remaining: string;
 }
 
+interface PoolCoverage {
+  pool_balance: string;
+  total_max_payout: string;
+  coverage_ratio: number | null;
+  coverage_pct: number | null;
+  shortfall: string;
+  status: "fully_covered" | "underfunded_warning" | "needs_topup" | null;
+}
+
 interface Payload {
   generated_at: string;
   reward_pool_balance: string | null;
+  pool_coverage: PoolCoverage;
   global: {
     total_quests: number;
     total_submissions: number;
@@ -144,7 +154,7 @@ export default function AnalyticsPage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
                 <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                   Approval conversion
@@ -178,6 +188,43 @@ export default function AnalyticsPage() {
                   QuestLockCore balance
                 </p>
               </div>
+              {(() => {
+                const c = data.pool_coverage;
+                const tone =
+                  c.status === "fully_covered"
+                    ? { bg: "#2D5A2D", fg: "#F6F1EA", label: "Fully covered" }
+                    : c.status === "underfunded_warning"
+                    ? { bg: "#7A5A20", fg: "#FFF1D6", label: "Underfunded warning" }
+                    : c.status === "needs_topup"
+                    ? { bg: "#6B3838", fg: "#F0DADA", label: "Pool needs top-up" }
+                    : { bg: "rgba(255,255,255,0.05)", fg: "var(--ql-cafe)", label: "—" };
+                return (
+                  <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                    <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
+                      Pool coverage
+                    </p>
+                    <p className="text-2xl font-bold font-mono" style={{ color: "#F6F1EA" }}>
+                      {c.coverage_pct !== null ? `${c.coverage_pct}%` : "—"}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2 flex-wrap">
+                      <span
+                        className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                        style={{ background: tone.bg, color: tone.fg }}
+                      >
+                        {tone.label}
+                      </span>
+                      {Number(c.shortfall) > 0 && (
+                        <span className="text-xs font-mono" style={{ color: "#F0DADA" }}>
+                          Shortfall: {c.shortfall} QUEST
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] mt-2" style={{ color: "var(--ql-bear)" }}>
+                      balance / total max payout
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Global top failure reasons */}
@@ -208,9 +255,14 @@ export default function AnalyticsPage() {
             )}
 
             {/* Per-quest cards */}
-            <h2 className="font-sans text-xl font-semibold mb-4" style={{ color: "#F6F1EA" }}>
+            <h2 className="font-sans text-xl font-semibold mb-1" style={{ color: "#F6F1EA" }}>
               Per quest
             </h2>
+            <p className="text-xs mb-4" style={{ color: "var(--ql-bear)" }}>
+              QuestLockCore holds one shared QUEST pool — there is no per-quest escrow.
+              The number below is the maximum QUEST this quest could still pay out if
+              every remaining claim slot is approved. It is not a reserved per-quest balance.
+            </p>
             <div className="space-y-4">
               {data.quests.map((q) => (
                 <div
@@ -263,7 +315,7 @@ export default function AnalyticsPage() {
                   <div className="flex flex-wrap gap-4 text-xs mb-4" style={{ color: "var(--ql-cafe)" }}>
                     <span>Approval: <span className="font-mono" style={{ color: "#F6F1EA" }}>{pct(q.analytics.approval_conversion_rate)}</span></span>
                     <span>Claim: <span className="font-mono" style={{ color: "#F6F1EA" }}>{pct(q.analytics.claim_conversion_rate)}</span></span>
-                    <span>Potential outflow remaining: <span className="font-mono" style={{ color: "#F6F1EA" }}>{q.potential_outflow_remaining} QUEST</span></span>
+                    <span>Max payout if fully claimed: <span className="font-mono" style={{ color: "#F6F1EA" }}>{q.potential_outflow_remaining} QUEST</span></span>
                   </div>
 
                   {q.analytics.top_failure_reasons.length > 0 && (
