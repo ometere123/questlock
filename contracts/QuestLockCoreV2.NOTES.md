@@ -18,15 +18,32 @@ v1.1.4's shared-pool model lets one quest drain another. V2 adds per-quest funde
 
 ```
 UNFUNDED ──fund──► PARTIALLY_FUNDED ──fund──► FUNDED
-                                              │
-                                              ├─claim if remaining < rewardAmount─► UNDERFUNDED
-                                              │
-                                              └─sponsor closes──► CLOSED ──withdraw all──► REFUNDED
-                                                                              │
-                          deadline passes + withdraw all unused (no claims) ──┘
+                          │                     │
+                          │                     ├─claim if remaining < rewardAmount─► UNDERFUNDED
+                          │                     │
+                          ├─claim if remaining < rewardAmount─► UNDERFUNDED
+                          │
+                          └─sponsor closes──► CLOSED ──withdraw all──► REFUNDED
+                                                              │
+                  deadline passes + withdraw all unused (no claims) ──┘
 ```
 
 Terminal states (`CLOSED`, `REFUNDED`) are never overwritten. `_recomputeFundingStatus` runs after every `fundQuest` / `topUpQuest` / claim.
+
+### Status semantics (owner-approved)
+
+| Status | Meaning |
+|---|---|
+| `UNFUNDED` | `fundedAmount == 0` — no deposits yet |
+| `PARTIALLY_FUNDED` | `0 < fundedAmount < requiredFunding` **and the quest can still pay at least one more claim** (`remaining >= rewardAmount`). Operational. |
+| `FUNDED` | `fundedAmount >= requiredFunding`. Sticky — once reached, the status stays `FUNDED` even after claims drain part of the pool, as long as `remaining >= rewardAmount`. |
+| `UNDERFUNDED` | `remaining < rewardAmount` and slots remain. **The quest cannot pay even one more claim.** Sponsor must top up or admin must close. |
+| `CLOSED` | Terminal. Sponsor or admin called `closeQuest`. Withdrawal is immediately allowed. |
+| `REFUNDED` | Terminal. All funds returned to sponsor (no claims happened). |
+| `EXPIRED` | View-only. Computed from `block.timestamp > deadline` — not stored. |
+| `PAUSED` | View-only. Reflects per-quest `active == false`. |
+
+The key refinement vs. the original draft: **initial partial deposits are `PARTIALLY_FUNDED`, not `UNDERFUNDED`.** A quest funded with 20 QUEST against a required 50 is operational for up to 2 claims and shown as `PARTIALLY_FUNDED`. Only when a future claim leaves `remaining < rewardAmount` does the contract emit `QuestUnderfunded` and transition the status.
 
 ## Critical invariants (tested)
 1. `fundedAmount >= claimedAmount + withdrawnAmount` at every state

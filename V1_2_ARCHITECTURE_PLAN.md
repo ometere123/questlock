@@ -1,8 +1,18 @@
 # QuestLock v1.2 — Architecture Plan
 
-**Branch:** `feature/v12-gap-audit` (local only — not pushed)
+**Branch lineage (local only — none pushed):**
+`feature/v12-gap-audit` → `feature/sponsor-funded-contract-design` → `feature/verifier-key-rotation-plan`
 **Baseline:** v1.1.4 at `ed9cfbc`
-**Status:** DRAFT — awaiting owner approval before any v1.2 code lands.
+**Status:** Phase 0 (audit) approved. Phase 1 (contract design) approved.
+**Next gate:** verifier key rotation plan + V2 deployment authorisation.
+
+### Revision history
+- 2026-06-04 — Initial draft (`feature/v12-gap-audit`)
+- 2026-06-05 — Reflects Phase 1 outcomes:
+  - `viaIR: true` enabled for local compile (approved)
+  - `UNDERFUNDED` semantic refined (approved)
+  - V2 contract test count finalised at 45 (63 total contract tests)
+  - Deployment explicitly blocked pending verifier key rotation + owner approval
 
 ---
 
@@ -269,9 +279,16 @@ Indexer subscribes to all of these.
 
 ## 15. Contract storage design (V2)
 
+> **Implementation note (Phase 1):** `EXPIRED` is computed at the view layer from
+> `block.timestamp > deadline` (not stored). `PAUSED` is reflected by the
+> per-quest `bool active` (not a stored enum value). The stored `FundingStatus`
+> enum therefore only holds funding-lifecycle values, which keeps the state
+> machine deterministic and simpler.
+
 ```solidity
 enum SubmissionStatus { NONE, SUBMITTED, APPROVED, REJECTED, CLAIMED }
-enum FundingStatus { UNFUNDED, PARTIALLY_FUNDED, FUNDED, UNDERFUNDED, EXPIRED, CLOSED, REFUNDED, PAUSED }
+// Stored values only. EXPIRED/PAUSED are derived at the view layer.
+enum FundingStatus    { UNFUNDED, PARTIALLY_FUNDED, FUNDED, UNDERFUNDED, CLOSED, REFUNDED }
 
 struct FundedQuest {
     uint256 id;
@@ -315,9 +332,20 @@ Invariant: `quest.fundedAmount >= quest.claimedAmount + quest.withdrawnAmount`.
 
 ---
 
-## 16. Contract function list (V2)
+### 15a. Refined `FundingStatus` semantics (owner-approved)
 
-Mirrors V1 + funding additions:
+| Status | When the contract sets it |
+|---|---|
+| `UNFUNDED` | `fundedAmount == 0` |
+| `PARTIALLY_FUNDED` | `0 < fundedAmount < requiredFunding` **and** the quest can still pay at least one more claim (`remaining >= rewardAmount`). Operational. |
+| `FUNDED` | `fundedAmount >= requiredFunding`. Sticky — stays `FUNDED` even after partial claims, as long as `remaining >= rewardAmount`. |
+| `UNDERFUNDED` | `remaining < rewardAmount` with slots still open. **Cannot pay even one more claim.** Emits `QuestUnderfunded`. |
+| `CLOSED` | Terminal. Sponsor or admin called `closeQuest`. |
+| `REFUNDED` | Terminal. All funds returned to sponsor and no claims occurred. |
+
+The key refinement vs. the original plan: an initial partial deposit (e.g. 20 / 50) is now `PARTIALLY_FUNDED`, not `UNDERFUNDED`. `UNDERFUNDED` is reserved for the post-claim drift case where the next claim would revert.
+
+## 16. Contract function list (V2 — as implemented in Phase 1)
 
 ```solidity
 // Creation
@@ -665,25 +693,23 @@ Pseudo-flow: upsert `(key, route, window_start)`, increment `count`, return deci
 
 ## 30. Test strategy
 
-### New contract tests (Hardhat)
-- create funded quest with required_funding = rewardAmount × maxClaims
-- fund quest (single + multiple deposits)
-- top up after FUNDED state
-- claim from funded balance
-- cannot overclaim beyond funded amount
-- cannot claim before approval
-- cannot claim from wrong quest pool (cross-quest leak test)
-- max claims enforced
-- deadline enforced
-- sponsor can withdraw after expiry
-- admin can withdraw after expiry
-- non-sponsor non-admin cannot withdraw
-- withdrawal blocked while quest is active
-- withdrawal blocked before deadline
-- pauseQuest blocks claims
-- contract pause blocks all sensitive ops
-- reentrancy protection on claim + withdraw
-- legacy v1 contract still passes its 18 tests untouched
+### New contract tests (Hardhat) — **Phase 1 RESULT: 45 V2 tests, all green; V1 still 18/18**
+
+Implemented and passing on `feature/sponsor-funded-contract-design`:
+
+| Group | Test count | Highlights |
+|---|---|---|
+| `createFundedQuest` | 6 | happy path, requiredFunding math, past deadline, zero maxClaims, zero reward, zero sponsor, role gate |
+| `fundQuest / topUpQuest` | 7 | partial→FUNDED, full→FUNDED, multi-funder, zero amount, missing quest, topUp emits ToppedUp, fund-after-FUNDED emits ToppedUp |
+| submission + approval | 7 | submit+approve, atomic submitAndApprove, score floor, hash mismatch, role gate, rejected blocks claim, double-submit blocked |
+| claim | 6 | user claimReward, verifier claimRewardFor, accounting deduction, double-claim blocked, no-approval blocked, **insufficient-funding blocked** |
+| **cross-quest isolation** | 2 | Quest B untouched after Quest A claim; draining A leaves B funded |
+| maxClaims + deadline | 2 | maxClaims=1 enforced, post-deadline submit blocked |
+| `withdrawUnusedQuestFunds` | 7 | sponsor-after-deadline, admin-on-behalf, blocked-while-active, non-sponsor-rejected, exceeds-unused-rejected, invariant-after-partial-claim, post-close immediate withdraw |
+| close + pause | 5 | pauseQuest+unpauseQuest, closeQuest terminal, role gate close, role gate pause, contract-wide pause blocks fund+submit+claim |
+| views | 2 | getClaimableCapacity math, getQuestFunding accounting |
+| (preserved) Existing V1 suite | 18 | all still pass byte-identically |
+| **Total** | **63 passing** | **45 new V2 + 18 V1** |
 
 ### New backend tests (Jest)
 - proof adapter registry: dispatch by proof_type
@@ -741,32 +767,42 @@ Per the brief's testing block — all 20+ checks.
 
 ## 33. Risks
 
-- **R1 — Contract bug.** Mitigation: full test suite, including cross-quest leak tests; consider sending a static analyser (`slither`) before deploy.
-- **R2 — Sponsor withdraws and a user claims simultaneously.** Mitigation: withdraw checks `claimedAmount` and revert on overdraw; claim checks remaining funds.
-- **R3 — Discord/X APIs change.** Mitigation: manual-review fallback always present.
-- **R4 — Vercel cold-start losing rate-limit state.** Mitigation: Supabase-backed bucket as source of truth.
-- **R5 — Scope creep.** Mitigation: 19 branches in order, no v1.3 features sneak in.
-- **R6 — Verifier wallet runs out of ETH.** Mitigation: admin System tab surfaces verifier balance; doc-level alert at <0.02 ETH.
-- **R7 — Old reused secrets.** Mitigation: production secrets already rotated for OAuth; verifier private key was leaked in early chat and should be rotated before v1.2 (separate task, not part of this code).
+- **R1 — Contract bug.** Mitigation: 45 V2 tests + cross-quest leak tests passing locally; consider a static analyser (e.g. `slither`) pre-deploy.
+- **R2 — Sponsor withdraws and a user claims simultaneously.** Mitigation: withdraw uses `nonReentrant` + checks `fundedAmount - claimedAmount - withdrawnAmount`; claim checks remaining funds and reverts cleanly.
+- **R3 — `viaIR` compiler change.** Mitigation: documented as local-only; V1 on-chain bytecode unaffected (we never redeploy from these artifacts); all V1 tests still pass after the switch. **If a `viaIR`-compiled V2 ever shows a runtime issue during deploy, stop and report before sending the deploy tx.**
+- **R4 — Discord/X APIs change.** Mitigation: manual-review fallback always present.
+- **R5 — Vercel cold-start losing rate-limit state.** Mitigation: Supabase-backed bucket as source of truth (see §29).
+- **R6 — Scope creep.** Mitigation: 19 branches in fixed order, no v1.3 features.
+- **R7 — Verifier wallet runs out of ETH.** Mitigation: admin System tab surfaces verifier balance; doc-level alert at <0.02 ETH.
+- **R8 — Verifier private key compromised.** **Confirmed compromise** — leaked into chat transcripts during early development. Mitigation: `VERIFIER_KEY_ROTATION_PLAN.md` produced in `feature/verifier-key-rotation-plan` (this branch). Rotation must complete and be verified on V1 before V2 deploy.
 
 ---
 
-## 34. Open owner decisions
+## 34. Open owner decisions (status updated)
 
-Before any v1.2 coding starts, answer:
+| # | Decision | Status |
+|---|---|---|
+| 1 | Contract architecture: Option C — Hybrid | ✅ **Approved** |
+| 2 | Deploy `QuestLockCoreV2` after design review | 🟡 Design approved locally; **deployment still blocked** pending verifier rotation + explicit go-ahead |
+| 3 | No `QuestFundingVault` (folded into V2) | ✅ **Approved** |
+| 4 | No EAS schema change | ✅ **Approved** |
+| 5 | No badge contract redeploy — use `setTokenURI` | ✅ **Approved** |
+| 6 | Same QUEST token for V1 + V2 quests | ✅ **Approved** |
+| 7 | Discord OAuth app creation | ⏸ **Deferred** to `feature/discord-proof` branch — owner will create app when reached |
+| 8 | X manual-review fallback | ✅ **Approved** (no paid X API in v1.2) |
+| 9 | 5 default quest templates seeded | ✅ **Approved** — list lands with `feature/quest-templates` |
+| 10 | In-app notifications only, no email | ✅ **Approved** |
+| 11 | Vercel Cron `INDEXER_CRON_KEY` | ⏸ Spec only — owner sets env when `feature/scheduled-indexer` is ready |
+| 12 | Verifier key rotation timing | ✅ **Before V2 deploy** — plan written in `VERIFIER_KEY_ROTATION_PLAN.md` (this branch); rotation execution still requires owner go-ahead |
 
-1. ✅ Contract architecture: **Option C — Hybrid**. Confirm?
-2. ✅ Deploy `QuestLockCoreV2` after design review. Confirm?
-3. ✅ No `QuestFundingVault` (folded into V2). Confirm?
-4. ✅ No EAS schema change. Confirm?
-5. ✅ No badge contract redeploy — use `setTokenURI` for new badge metadata. Confirm?
-6. ✅ Same QUEST token for V1 + V2 quests. Confirm?
-7. Discord OAuth: do you want to create the Discord OAuth app now or after the rest of v1.2 is built?
-8. X / Twitter proof: confirm manual-review fallback is acceptable for v1.2 (no paid X API).
-9. Quest templates: 5 default templates seeded? OK if I include the list in feature/quest-templates branch?
-10. Notifications: in-app only, no email in v1.2. Confirm?
-11. Vercel Cron secret: I'll add `INDEXER_CRON_KEY` to env and `vercel.json`. Confirm?
-12. Verifier private key rotation: should I do this before or after v1.2 contract deploy? (Recommend before — it's the wallet that will sign all V2 approvals.)
+### Resolved during Phase 1
+- 13 — `viaIR: true` is acceptable for V2 local compile. ✅ Documented in `QuestLockCoreV2.NOTES.md`; V1 on-chain unaffected; V1 tests still pass.
+- 14 — `UNDERFUNDED` semantic: "remaining < rewardAmount" (cannot pay one more claim), not "fundedAmount < requiredFunding". ✅ Reflected in §15a, the contract code, and the V2 design notes.
+
+### Still blocking V2 deploy
+- Verifier key rotation must complete first.
+- Owner must explicitly authorise the V2 deploy and DB migration when ready.
+- No GitHub push, no PR, no merge, no tag, no production env change until owner says so.
 
 ---
 
