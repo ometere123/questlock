@@ -239,6 +239,7 @@ export async function POST(req: NextRequest) {
         riskBand: antiFarm.riskBand,
         checks: scoringResult.checks,
         failureReasons: allFailureReasons,
+        warnings: scoringResult.warnings,
       });
     }
 

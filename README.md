@@ -116,6 +116,18 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 proof engine hardening
+
+- New `lib/retry.ts` (exponential backoff, retryable-status whitelist) used by both the GitHub fetcher and the demo-URL probe. Transient `429`, `408`, `425`, `5xx`, timeouts and socket errors are retried up to 2 times before giving up.
+- `lib/github.ts` now captures: fork status, default branch, primary language, file count and max directory depth, package manager (`npm` / `pnpm` / `yarn` / `bun`), README section-heading count, and crucially **commit authorship** — how many of the post-start commits are attributed to the submitting GitHub user (login, name or email heuristic).
+- Frontend / contract detection expanded to a regex set covering Next / Vite / Svelte / Nuxt configs, `*.tsx`, `*.sol`, Hardhat / Foundry / Truffle configs, `server/`, `api/`, `prisma/`, plus Go/Rust/Java backend signals.
+- Scoring (`lib/scoring.ts`) keeps the same **100-point ceiling** and the same 10 check names so existing data is still comparable. What changes:
+  - `commits_after_start` now fails if every post-start commit is unattributable to the submitting user (typical fork-without-work pattern).
+  - All failure-reason copy got crisper — for example, `frontend_files` now lists the patterns it looked for.
+  - Demo URL details include the retry attempt count when a retry occurred.
+- Soft `warnings[]` channel: signals that should inform but not zero a check (e.g. "Repository is a fork.") flow through scoring → API response → UI without affecting the score.
+- Tests: 5 new tests for `lib/retry.ts` and 7 new tests for `lib/scoring.ts` covering happy path, fork warnings, unattributed commits, duplicate gate, demo failure surfacing.
+
 ## v1.1 manual review / appeals queue
 
 - New `submission_appeals` table with one-appeal-per-submission constraint. Lifecycle: `PENDING → PROCESSING → APPROVED | REJECTED | APPROVE_FAILED` (the last is retryable).

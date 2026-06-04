@@ -1,3 +1,17 @@
+// GitHub proof fetcher. v1.1 hardening:
+//   - retry transient 5xx/429 via lib/retry
+//   - capture fork, language, default branch, primary topics
+//   - authorship signal: was at least one of the post-start commits
+//     authored by the submitting GitHub user?
+//   - README structure: section count, length
+//   - file tree depth + package manager + broader frontend/contract patterns
+//
+// The point allocations in scoring.ts are unchanged so existing data is still
+// readable; we feed richer signals into the same checks and improve the
+// failure-reason copy.
+
+import { withRetry, isRetryableStatus } from "./retry";
+
 export interface GitHubRepoData {
   owner: string;
   repo: string;
@@ -8,17 +22,20 @@ export interface GitHubRepoData {
   pushedAt: string | null;
   updatedAt: string | null;
   defaultBranch: string;
+  language: string | null;
   commitCountAfterStart: number;
+  commitsByOwnerCount: number;
   hasReadme: boolean;
   readmeCharCount: number;
+  readmeSectionCount: number;
   hasFrontendFiles: boolean;
   hasContractFiles: boolean;
+  packageManager: "npm" | "pnpm" | "yarn" | "bun" | "unknown";
+  fileCount: number;
+  directoryDepth: number;
   error?: string;
-}
-
-export interface CommitInfo {
-  sha: string;
-  date: string;
+  // Soft warnings — surfaced in the UI but do not by themselves fail a check.
+  warnings: string[];
 }
 
 const GITHUB_API = "https://api.github.com";
@@ -53,17 +70,83 @@ export function normaliseGitHubUrl(url: string): string | null {
   return `https://github.com/${parsed.owner}/${parsed.repo}`;
 }
 
-async function apiGet(path: string): Promise<{ ok: boolean; status: number; data: unknown }> {
+class HttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+async function apiGetOnce(path: string): Promise<unknown> {
   const res = await fetch(`${GITHUB_API}${path}`, {
     headers: githubHeaders(),
     next: { revalidate: 0 },
   });
-  if (!res.ok) {
-    return { ok: false, status: res.status, data: null };
-  }
-  const data = await res.json();
-  return { ok: true, status: res.status, data };
+  if (!res.ok) throw new HttpError(res.status, `GitHub ${path} -> ${res.status}`);
+  return res.json();
 }
+
+interface ApiResult { ok: boolean; status: number; data: unknown; }
+
+async function apiGet(path: string): Promise<ApiResult> {
+  try {
+    const data = await withRetry((attempt) => apiGetOnce(path), {
+      retries: 2,
+      baseDelayMs: 400,
+      isRetryable: (err) =>
+        err instanceof HttpError ? isRetryableStatus(err.status) : true,
+    });
+    return { ok: true, status: 200, data };
+  } catch (err) {
+    if (err instanceof HttpError) return { ok: false, status: err.status, data: null };
+    return { ok: false, status: 0, data: null };
+  }
+}
+
+function countReadmeSections(text: string): number {
+  // Headings of form "# title", "## title", "### title" (markdown-flavoured)
+  const lines = text.split(/\r?\n/);
+  return lines.filter((l) => /^#{1,6}\s+\S/.test(l)).length;
+}
+
+function detectPackageManager(paths: string[]): GitHubRepoData["packageManager"] {
+  if (paths.includes("pnpm-lock.yaml")) return "pnpm";
+  if (paths.includes("yarn.lock")) return "yarn";
+  if (paths.includes("bun.lockb") || paths.includes("bun.lock")) return "bun";
+  if (paths.includes("package-lock.json")) return "npm";
+  return "unknown";
+}
+
+const FRONTEND_PATTERNS: RegExp[] = [
+  /(^|\/)package\.json$/,
+  /(^|\/)index\.(html|tsx|jsx|ts|js)$/,
+  /(^|\/)app\//,
+  /(^|\/)pages\//,
+  /(^|\/)src\//,
+  /(^|\/)components\//,
+  /(^|\/)next\.config\.(ts|js|mjs|cjs)$/,
+  /(^|\/)vite\.config\.(ts|js|mjs|cjs)$/,
+  /(^|\/)svelte\.config\.(ts|js)$/,
+  /(^|\/)nuxt\.config\.(ts|js)$/,
+  /(^|\/)tailwind\.config\.(ts|js)$/,
+  /\.(tsx|jsx)$/,
+];
+
+const CONTRACT_BACKEND_PATTERNS: RegExp[] = [
+  /(^|\/)contracts?\//,
+  /\.sol$/,
+  /(^|\/)hardhat\.config\.(ts|js|mjs|cjs)$/,
+  /(^|\/)foundry\.toml$/,
+  /(^|\/)truffle-config\.(js|ts)$/,
+  /(^|\/)remappings\.txt$/,
+  /(^|\/)server\//,
+  /(^|\/)backend\//,
+  /(^|\/)api\//,
+  /(^|\/)prisma\//,
+  /(^|\/)main\.go$/,
+  /(^|\/)main\.rs$/,
+  /(^|\/)cargo\.toml$/i,
+  /(^|\/)pom\.xml$/i,
+];
 
 export async function fetchRepoData(
   owner: string,
@@ -81,19 +164,30 @@ export async function fetchRepoData(
     pushedAt: null,
     updatedAt: null,
     defaultBranch: "main",
+    language: null,
     commitCountAfterStart: 0,
+    commitsByOwnerCount: 0,
     hasReadme: false,
     readmeCharCount: 0,
+    readmeSectionCount: 0,
     hasFrontendFiles: false,
     hasContractFiles: false,
+    packageManager: "unknown",
+    fileCount: 0,
+    directoryDepth: 0,
+    warnings: [],
   };
 
-  // Fetch repo metadata
+  // 1. Repo metadata
   const repoRes = await apiGet(`/repos/${owner}/${repo}`);
   if (!repoRes.ok) {
     base.error =
       repoRes.status === 404
         ? "Repository not found or is private."
+        : repoRes.status === 429
+        ? "GitHub rate limit hit. Please retry shortly."
+        : repoRes.status === 0
+        ? "Could not reach GitHub. Please retry."
         : `GitHub API error: ${repoRes.status}`;
     return base;
   }
@@ -103,26 +197,59 @@ export async function fetchRepoData(
   base.ownerLogin = (repoData.owner as Record<string, string>)?.login || "";
   base.isForked = Boolean(repoData.fork);
   base.isEmpty = Boolean(repoData.size === 0);
-  base.pushedAt = repoData.pushed_at as string | null;
-  base.updatedAt = repoData.updated_at as string | null;
+  base.pushedAt = (repoData.pushed_at as string | null) ?? null;
+  base.updatedAt = (repoData.updated_at as string | null) ?? null;
   base.defaultBranch = (repoData.default_branch as string) || "main";
+  base.language = (repoData.language as string | null) ?? null;
 
-  // Check owner matches submitted username (case-insensitive)
+  if (base.isForked) {
+    base.warnings.push(
+      "Repository is a fork. Make sure the meaningful work is in commits authored by you after the quest start."
+    );
+  }
+  if (base.isEmpty) {
+    base.warnings.push("Repository is empty.");
+  }
+
   if (base.ownerLogin.toLowerCase() !== submittedGithubUsername.toLowerCase()) {
     base.error = `Repository owner (${base.ownerLogin}) does not match submitted GitHub username (${submittedGithubUsername}).`;
   }
 
-  // Fetch commits after quest start
+  // 2. Commits since quest start — capture authorship signal too.
   const since = questStartTime.toISOString();
   const commitsRes = await apiGet(
     `/repos/${owner}/${repo}/commits?since=${since}&per_page=100`
   );
   if (commitsRes.ok) {
-    const commits = commitsRes.data as unknown[];
-    base.commitCountAfterStart = Array.isArray(commits) ? commits.length : 0;
+    const commits = commitsRes.data as Array<Record<string, unknown>>;
+    if (Array.isArray(commits)) {
+      base.commitCountAfterStart = commits.length;
+      const submittedLower = submittedGithubUsername.toLowerCase();
+      base.commitsByOwnerCount = commits.filter((c) => {
+        const author = c.author as { login?: string } | null;
+        const committer = c.committer as { login?: string } | null;
+        const commitObj = c.commit as { author?: { name?: string; email?: string } } | undefined;
+        const login = (author?.login || committer?.login || "").toLowerCase();
+        if (login === submittedLower) return true;
+        // Fall back to email/name heuristics in case GitHub did not link
+        // the commit to the user's account.
+        const commitAuthorName = (commitObj?.author?.name || "").toLowerCase();
+        const commitAuthorEmail = (commitObj?.author?.email || "").toLowerCase();
+        return (
+          commitAuthorName.includes(submittedLower) ||
+          commitAuthorEmail.includes(submittedLower)
+        );
+      }).length;
+
+      if (base.commitCountAfterStart > 0 && base.commitsByOwnerCount === 0) {
+        base.warnings.push(
+          "Commits since quest start are not attributed to your GitHub account."
+        );
+      }
+    }
   }
 
-  // Fetch README
+  // 3. README content + section structure
   const readmeRes = await apiGet(`/repos/${owner}/${repo}/readme`);
   if (readmeRes.ok) {
     base.hasReadme = true;
@@ -130,50 +257,42 @@ export async function fetchRepoData(
     if (readmeData.content) {
       try {
         const decoded = Buffer.from(readmeData.content, "base64").toString("utf-8");
-        // Count visible (non-whitespace) characters
         base.readmeCharCount = decoded.replace(/\s+/g, " ").trim().length;
+        base.readmeSectionCount = countReadmeSections(decoded);
       } catch {
         base.readmeCharCount = 0;
       }
     }
   }
 
-  // Fetch file tree
+  // 4. File tree (recursive on default branch)
   const treeRes = await apiGet(
     `/repos/${owner}/${repo}/git/trees/${base.defaultBranch}?recursive=1`
   );
   if (treeRes.ok) {
-    const treeData = treeRes.data as { tree: Array<{ path: string }> };
-    const paths = (treeData.tree || []).map((f) => f.path.toLowerCase());
+    const treeData = treeRes.data as { tree?: Array<{ path: string; type: string }> };
+    const entries = treeData.tree || [];
+    const filePaths = entries
+      .filter((e) => e.type === "blob")
+      .map((e) => e.path);
+    const lowerPaths = filePaths.map((p) => p.toLowerCase());
 
-    const frontendIndicators = [
-      "package.json",
-      "src/",
-      "pages/",
-      "components/",
-      "app/",
-      "index.html",
-      "index.js",
-      "index.ts",
-    ];
-    base.hasFrontendFiles = frontendIndicators.some((indicator) =>
-      paths.some((p) => p === indicator || p.startsWith(indicator))
+    base.fileCount = filePaths.length;
+    base.directoryDepth = filePaths.reduce(
+      (max, p) => Math.max(max, p.split("/").length - 1),
+      0
     );
 
-    const contractIndicators = [
-      "contracts/",
-      "contract/",
-      ".sol",
-      "hardhat.config",
-      "foundry.toml",
-      "truffle-config",
-      "server/",
-      "backend/",
-      "api/",
-    ];
-    base.hasContractFiles = contractIndicators.some((indicator) =>
-      paths.some((p) => p.endsWith(indicator) || p.includes(indicator))
+    base.hasFrontendFiles = FRONTEND_PATTERNS.some((re) =>
+      lowerPaths.some((p) => re.test(p))
     );
+    base.hasContractFiles = CONTRACT_BACKEND_PATTERNS.some((re) =>
+      lowerPaths.some((p) => re.test(p))
+    );
+
+    // Just the basenames for package manager detection.
+    const basenames = lowerPaths.map((p) => p.split("/").pop() || "");
+    base.packageManager = detectPackageManager(basenames);
   }
 
   return base;

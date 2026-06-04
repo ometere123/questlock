@@ -14,6 +14,8 @@ export interface ScoringRubric {
   not_previously_submitted: number;
 }
 
+// Same defaults as v1 — keep the 100-point ceiling stable so existing data
+// remains comparable.
 export const DEFAULT_RUBRIC: ScoringRubric = {
   repo_exists: 10,
   owner_matches: 10,
@@ -39,6 +41,7 @@ export interface ScoringResult {
   score: number;
   checks: ProofCheckResult[];
   failureReasons: string[];
+  warnings: string[];
   passed: boolean;
 }
 
@@ -69,9 +72,7 @@ export function scoreProof(
       max_points: maxPts,
       details: passed ? passDetail : failDetail,
     });
-    if (!passed && maxPts > 0) {
-      failureReasons.push(failDetail);
-    }
+    if (!passed && maxPts > 0) failureReasons.push(failDetail);
   }
 
   // 1. Repo exists
@@ -83,7 +84,7 @@ export function scoreProof(
     repoData.error || "Repository not found or is private."
   );
 
-  // 2. Owner matches
+  // 2. Owner matches submitted username
   const ownerMatches =
     repoData.exists &&
     repoData.ownerLogin.toLowerCase() === repoData.owner.toLowerCase();
@@ -91,11 +92,11 @@ export function scoreProof(
     "owner_matches",
     ownerMatches,
     r.owner_matches,
-    `Repository owner matches submitted GitHub username.`,
-    `Repository owner (${repoData.ownerLogin}) does not match submitted username.`
+    "Repository owner matches submitted GitHub username.",
+    `Repository owner (${repoData.ownerLogin || "?"}) does not match submitted username (${repoData.owner}).`
   );
 
-  // 3. Repo updated after quest start
+  // 3. Updated after start
   const repoUpdated =
     repoData.exists &&
     repoData.pushedAt != null &&
@@ -105,17 +106,30 @@ export function scoreProof(
     repoUpdated,
     r.repo_updated_after_start,
     "Repository was updated after quest started.",
-    "Repository has not been updated since the quest started."
+    "Repository has not been pushed since the quest started."
   );
 
-  // 4. At least 3 commits after start
-  const enoughCommits = repoData.exists && repoData.commitCountAfterStart >= 3;
+  // 4. At least 3 commits after start — AND if there are commits, at least one
+  //    must be attributable to the submitting GitHub user. A pile of merge
+  //    commits from someone else (typical fork pattern) should not pass.
+  let commitsPass = repoData.exists && repoData.commitCountAfterStart >= 3;
+  let commitsDetail: string;
+  if (!repoData.exists) {
+    commitsDetail = "Repository not reachable; cannot count commits.";
+  } else if (repoData.commitCountAfterStart < 3) {
+    commitsDetail = `Only ${repoData.commitCountAfterStart} commits found after quest start (need at least 3).`;
+  } else if (repoData.commitsByOwnerCount === 0) {
+    commitsPass = false;
+    commitsDetail = `${repoData.commitCountAfterStart} commits found, but none are attributed to @${repoData.owner}.`;
+  } else {
+    commitsDetail = `${repoData.commitCountAfterStart} commits found after quest start (${repoData.commitsByOwnerCount} by @${repoData.owner}).`;
+  }
   check(
     "commits_after_start",
-    enoughCommits,
+    commitsPass,
     r.commits_after_start,
-    `${repoData.commitCountAfterStart} commits found after quest start.`,
-    `Only ${repoData.commitCountAfterStart} commits found after quest start (need at least 3).`
+    commitsDetail,
+    commitsDetail
   );
 
   // 5. README exists
@@ -127,41 +141,53 @@ export function scoreProof(
     "No README file found in repository."
   );
 
-  // 6. README length >= 500 chars
+  // 6. README length
   const readmeLong = repoData.hasReadme && repoData.readmeCharCount >= 500;
+  const readmeDetail = readmeLong
+    ? `README has ${repoData.readmeCharCount} characters and ${repoData.readmeSectionCount} section heading(s).`
+    : `README too short: ${repoData.readmeCharCount} characters (need at least 500).`;
   check(
     "readme_length",
     readmeLong,
     r.readme_length,
-    `README has ${repoData.readmeCharCount} characters (minimum 500).`,
-    `README too short: ${repoData.readmeCharCount} characters (need at least 500).`
+    readmeDetail,
+    readmeDetail
   );
 
   // 7. Frontend files
+  const frontendDetail = repoData.hasFrontendFiles
+    ? `Frontend files detected${repoData.packageManager !== "unknown" ? ` (package manager: ${repoData.packageManager})` : ""}.`
+    : "No frontend files detected (package.json, src/, pages/, components/, *.tsx, etc.).";
   check(
     "frontend_files",
     repoData.hasFrontendFiles,
     r.frontend_files,
-    "Frontend files detected (package.json, components, pages, etc.).",
-    "No frontend files detected."
+    frontendDetail,
+    frontendDetail
   );
 
   // 8. Contract/backend files
+  const contractDetail = repoData.hasContractFiles
+    ? "Contract or backend files detected."
+    : "No contract or backend files detected (contracts/, *.sol, hardhat.config, server/, backend/, api/, etc.).";
   check(
     "contract_files",
     repoData.hasContractFiles,
     r.contract_files,
-    "Contract or backend files detected.",
-    "No contract or backend files detected."
+    contractDetail,
+    contractDetail
   );
 
-  // 9. Demo URL loads
+  // 9. Demo URL
+  const demoDetail = demoResult.passed
+    ? `Demo URL loaded successfully${demoResult.attempts && demoResult.attempts > 1 ? ` after ${demoResult.attempts} attempts` : ""}.`
+    : demoResult.reason || "Demo URL did not load.";
   check(
     "demo_url_loads",
     demoResult.passed,
     r.demo_url_loads,
-    "Demo URL loaded successfully.",
-    demoResult.reason || "Demo URL did not load."
+    demoDetail,
+    demoDetail
   );
 
   // 10. Not previously submitted
@@ -170,11 +196,17 @@ export function scoreProof(
     !isDuplicate,
     r.not_previously_submitted,
     "Repository not previously submitted for this quest.",
-    "Repository has already been submitted for this quest by another user."
+    "Repository has already been submitted for this quest by another wallet."
   );
 
   const score = checks.reduce((sum, c) => sum + c.points_awarded, 0);
   const passed = score >= minScore && !isDuplicate && repoData.exists;
 
-  return { score, checks, failureReasons, passed };
+  return {
+    score,
+    checks,
+    failureReasons,
+    warnings: repoData.warnings || [],
+    passed,
+  };
 }
