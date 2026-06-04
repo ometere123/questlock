@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
+import RewardPoolTopUp from "@/components/RewardPoolTopUp";
 
 const ADMIN_WALLET = "0x1f63ea74065586af0c7c48428372d88d0a89525b";
 
@@ -255,6 +256,16 @@ export default function AnalyticsPage() {
             )}
 
             {/* Per-quest cards */}
+            {/* Reward pool management (admin-only, wallet-signed) */}
+            <RewardPoolTopUp
+              adminWallet={ADMIN_WALLET}
+              poolBalance={data.reward_pool_balance}
+              totalMaxPayout={data.pool_coverage.total_max_payout}
+              shortfall={data.pool_coverage.shortfall}
+              poolCoveragePct={data.pool_coverage.coverage_pct}
+              onSuccess={load}
+            />
+
             <h2 className="font-sans text-xl font-semibold mb-1" style={{ color: "#F6F1EA" }}>
               Per quest
             </h2>
