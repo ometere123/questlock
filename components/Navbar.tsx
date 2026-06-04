@@ -86,6 +86,13 @@ export default function Navbar() {
                   >
                     Appeals
                   </Link>
+                  <Link
+                    href="/ops-ql/analytics"
+                    className="text-sm font-medium"
+                    style={{ color: "var(--ql-cafe)" }}
+                  >
+                    Analytics
+                  </Link>
                 </>
               )}
             </>

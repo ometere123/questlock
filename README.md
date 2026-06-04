@@ -116,6 +116,16 @@ User submits GitHub proof
 | `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
 | `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
 
+## v1.1 quest analytics
+
+- Admin-only read-only dashboard at **`/ops-ql/analytics`** built from cards, tables and percentages — no charting library, no client state beyond a refresh button.
+- Pure aggregator in `lib/analytics.ts` (`aggregateQuestAnalytics`, `potentialOutflowRemaining`) means the math is unit-testable without DB.
+- Global tiles: total quests, total submissions, total approved onchain, total claimed, global approval conversion %, global claim conversion %, live QuestLockCore QUEST pool balance (read via `viem` from `QuestRewardToken.balanceOf`).
+- Per-quest cards: submitted / passed / failed / claimable / claimed / avg score, approval conversion %, claim conversion %, **potential outflow remaining** (`(maxClaims − totalClaims) × rewardAmount`), and the top 5 failure reasons for that quest.
+- Global top-8 failure reasons across all quests so admin can spot the most common builder mistakes at a glance.
+- Single endpoint: `GET /api/ops-ql/analytics` returns one JSON payload with everything the page needs.
+- 11 new aggregator tests cover empty input, mixed-status counting, conversion rates, top-N sorting + cap, defensive null/non-array handling, in-progress bucket boundaries.
+
 ## v1.1 proof engine hardening
 
 - New `lib/retry.ts` (exponential backoff, retryable-status whitelist) used by both the GitHub fetcher and the demo-URL probe. Transient `429`, `408`, `425`, `5xx`, timeouts and socket errors are retried up to 2 times before giving up.
