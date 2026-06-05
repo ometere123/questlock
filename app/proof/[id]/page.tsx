@@ -46,6 +46,7 @@ async function getPublicProof(id: string) {
       },
       user: {
         select: {
+          display_name: true,
           github_login: true,
           github_avatar_url: true,
           github_profile_url: true,
@@ -255,7 +256,9 @@ export default async function PublicProofPage({
   const shortWallet = `${proof.wallet_address.slice(0, 8)}…${proof.wallet_address.slice(-6)}`;
   const totalMax = proof.proof_checks.reduce((s, c) => s + c.max_points, 0);
 
-  const subjectLabel = proof.github_login ? `@${proof.github_login}` : shortWallet;
+  // v1.2 fallback chain: display_name → @github_login → short wallet
+  const subjectLabel = proof.display_name
+    || (proof.github_login ? `@${proof.github_login}` : shortWallet);
 
   return (
     <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>

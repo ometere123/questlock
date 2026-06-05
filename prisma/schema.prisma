@@ -11,6 +11,10 @@ datasource db {
 model User {
   id              String   @id @default(uuid())
   wallet_address  String   @unique
+  // v1.2 — optional human display name surfaced on the leaderboard, public
+  // proof certificate, and profile header. Falls back to github_login then
+  // short wallet when null.
+  display_name    String?
   github_username String?
   // GitHub OAuth linking (v1.1)
   github_id           String?  @unique

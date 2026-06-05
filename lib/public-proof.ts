@@ -28,6 +28,7 @@ export interface PublicProof {
   score: number;
   risk_band: string;
   wallet_address: string;
+  display_name: string | null;
   github_login: string | null;
   github_avatar_url: string | null;
   github_profile_url: string | null;
@@ -88,6 +89,7 @@ interface RawSubmission {
     min_score: number;
   };
   user?: {
+    display_name?: string | null;
     github_login: string | null;
     github_avatar_url: string | null;
     github_profile_url: string | null;
@@ -137,6 +139,7 @@ export function toPublicProof(s: RawSubmission): PublicProof {
     score: s.score ?? 0,
     risk_band: s.risk_band ?? "UNKNOWN",
     wallet_address: s.wallet_address,
+    display_name: s.user?.display_name ?? null,
     github_login: s.user?.github_login ?? null,
     github_avatar_url: s.user?.github_avatar_url ?? null,
     github_profile_url: s.user?.github_profile_url ?? null,

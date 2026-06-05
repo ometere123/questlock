@@ -4,6 +4,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import StatusBadge from "@/components/StatusBadge";
 import GithubConnectCard from "@/components/GithubConnectCard";
+import DiscordConnectCard from "@/components/DiscordConnectCard";
+import DisplayNameCard from "@/components/DisplayNameCard";
 import { easAttestationUrl, explorerTxUrl } from "@/lib/chains";
 import Link from "next/link";
 
@@ -143,7 +145,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {walletAddress && <DisplayNameCard walletAddress={walletAddress} />}
         {walletAddress && <GithubConnectCard walletAddress={walletAddress} />}
+        {walletAddress && <DiscordConnectCard walletAddress={walletAddress} />}
 
         {loading ? (
           <p className="text-center py-12" style={{ color: "var(--ql-bear)" }}>
