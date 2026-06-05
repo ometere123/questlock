@@ -42,7 +42,10 @@ export async function POST(
 
   const submission = existing.submission;
   const quest = submission.quest;
-  if (!quest.onchain_quest_id) {
+  // v1.2: route to V1 or V2 contract by quest.contract_version
+  const isV2 = quest.contract_version === 2;
+  const onchainQid = isV2 ? quest.funded_quest_id : quest.onchain_quest_id;
+  if (!onchainQid) {
     return NextResponse.json(
       { error: "Quest has no onchain id; cannot approve onchain." },
       { status: 400 }
@@ -61,7 +64,7 @@ export async function POST(
 
   try {
     const result = await approveAppealOnchain({
-      questOnchainId: quest.onchain_quest_id,
+      questOnchainId: onchainQid,
       questMinScore: quest.min_score,
       walletAddress: submission.wallet_address as `0x${string}`,
       repoUrl: submission.repo_url,
@@ -69,6 +72,7 @@ export async function POST(
       score: submission.score ?? 0,
       existingProofHash: submission.proof_hash,
       questDbId: quest.id,
+      contractVersion: (isV2 ? 2 : 1) as 1 | 2,
     });
 
     // Update the underlying submission so /me, /proof/[id], and the admin

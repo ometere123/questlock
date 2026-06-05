@@ -316,15 +316,20 @@ export async function POST(req: NextRequest) {
     // === PHASE 7: Onchain approval ===
     let approvalTxHash: string | null = null;
     try {
-      if (quest.onchain_quest_id) {
+      // v1.2: route to V2 contract if this is a sponsor-funded quest.
+      const onchainQid = quest.contract_version === 2
+        ? quest.funded_quest_id
+        : quest.onchain_quest_id;
+      if (onchainQid) {
         approvalTxHash = await approveSubmissionOnchain({
-          questId: quest.onchain_quest_id,
+          questId: onchainQid,
           user: walletAddress as `0x${string}`,
           proofHash: proofHashBytes32,
           attestationUID: (attestationUID.startsWith("0x")
             ? attestationUID
             : "0x" + attestationUID) as `0x${string}`,
           score: scoringResult.score,
+          contractVersion: (quest.contract_version ?? 1) as 1 | 2,
         });
       }
     } catch (approvalErr) {

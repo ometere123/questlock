@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/indexer?key=cron",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}

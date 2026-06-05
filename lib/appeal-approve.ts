@@ -31,6 +31,7 @@ interface AppealApproveInput {
   score: number;
   existingProofHash: string | null;
   questDbId: string;
+  contractVersion?: 1 | 2;  // v1.2 routing
 }
 
 export interface AppealApproveResult {
@@ -82,6 +83,7 @@ export async function approveAppealOnchain(
     proofHash: proofHashBytes32,
     attestationUID: attestationUid as `0x${string}`,
     score: scoreOnchain,
+    contractVersion: input.contractVersion ?? 1,
   });
 
   return {

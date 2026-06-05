@@ -54,8 +54,22 @@ export default function Navbar() {
           >
             Create
           </Link>
+          <Link
+            href="/leaderboard"
+            className="text-sm font-medium transition-colors"
+            style={{ color: "var(--ql-ashen)" }}
+          >
+            Leaderboard
+          </Link>
           {authenticated && (
             <>
+              <Link
+                href="/sponsor"
+                className="text-sm font-medium"
+                style={{ color: "var(--ql-ashen)" }}
+              >
+                Sponsor
+              </Link>
               <Link
                 href="/me"
                 className="text-sm font-medium"

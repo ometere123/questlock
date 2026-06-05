@@ -8,5 +8,5 @@ export type { QuestRewardToken } from './QuestRewardToken.js';
 export * as factories from './factories/index.js';
 export { QuestBadge__factory } from './factories/QuestBadge__factory.js';
 export { QuestLockCore__factory } from './factories/QuestLockCore__factory.js';
-export { QuestLockCoreV2__factory } from './factories/QuestLockCoreV2__factory.js';
 export { QuestRewardToken__factory } from './factories/QuestRewardToken__factory.js';
+export { QuestLockCoreV2__factory } from './factories/QuestLockCoreV2__factory.js';

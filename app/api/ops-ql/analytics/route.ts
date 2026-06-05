@@ -96,6 +96,15 @@ export async function GET(req: NextRequest) {
           totalClaims: a.claimed,
           rewardAmount: q.reward_amount,
         }),
+        // v1.2 sponsor-funded fields (null/0 for legacy quests)
+        contract_version: q.contract_version ?? 1,
+        funded_quest_id: q.funded_quest_id,
+        funding_status: q.funding_status,
+        sponsor_wallet: q.sponsor_wallet,
+        required_funding: q.required_funding,
+        funded_amount: q.funded_amount,
+        claimed_amount_onchain: q.claimed_amount_onchain,
+        withdrawn_amount: q.withdrawn_amount,
       };
     });
 
