@@ -15,6 +15,13 @@ model User {
   // proof certificate, and profile header. Falls back to github_login then
   // short wallet when null.
   display_name    String?
+  // v1.2.1 — sponsor trust tier. 'new' (first 3 approvals require admin
+  // confirmation), 'trusted' (sponsor approval fires onchain directly),
+  // 'flagged' (admin confirmation required again), 'suspended' (cannot
+  // approve at all). Counter tracks successful admin-confirmed approvals
+  // toward promotion to 'trusted'.
+  sponsor_trust_level             String  @default("new")
+  successful_confirmed_approvals  Int     @default(0)
   github_username String?
   // GitHub OAuth linking (v1.1)
   github_id           String?  @unique

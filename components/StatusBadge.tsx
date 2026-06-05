@@ -23,6 +23,7 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
   ATTESTING: { label: "Issuing Attestation", className: "badge-checking" },
   ATTESTED: { label: "Attestation Issued", className: "badge-attested" },
   APPROVING_ONCHAIN: { label: "Approving Onchain", className: "badge-checking" },
+  SPONSOR_APPROVED_PENDING_ADMIN: { label: "Pending Admin Confirmation", className: "badge-checking" },
   APPROVED_ONCHAIN: { label: "Reward Unlocked", className: "badge-claimable" },
   CLAIMING: { label: "Claiming…", className: "badge-checking" },
   CLAIMED: { label: "Reward Claimed", className: "badge-claimed" },

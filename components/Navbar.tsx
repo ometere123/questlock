@@ -122,6 +122,13 @@ export default function Navbar() {
                   >
                     Retry
                   </Link>
+                  <Link
+                    href="/ops-ql/confirmations"
+                    className="text-sm font-medium"
+                    style={{ color: "var(--ql-cafe)" }}
+                  >
+                    Confirmations
+                  </Link>
                 </>
               )}
             </>

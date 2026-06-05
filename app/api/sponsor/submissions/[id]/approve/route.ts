@@ -1,11 +1,20 @@
 // v1.2 — Sponsor approves their own quest's manual submission.
-// Gated by quest.sponsor_wallet matching caller's x-wallet-address header.
-// Reuses the appeal-approve pipeline (EAS attestation + verifier submitAndApprove).
+// v1.2.1 — Branching:
+//   - Trusted sponsor + non-high-value quest → fire onchain immediately
+//     (EAS attestation + verifier submitAndApprove). Same as v1.2.
+//   - Otherwise → flip status to SPONSOR_APPROVED_PENDING_ADMIN and wait
+//     for admin confirmation. Onchain firing happens in
+//     /api/admin/confirmations/[id]/confirm.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { approveAppealOnchain } from "@/lib/appeal-approve";
 import { log } from "@/lib/logger";
+import {
+  getSponsorTrust,
+  decideApprovalRoute,
+  SUBMISSION_STATUS,
+} from "@/lib/sponsor-trust";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +34,6 @@ export async function POST(
   });
   if (!sub) return NextResponse.json({ error: "Submission not found." }, { status: 404 });
 
-  // Authorisation: caller must be the quest's sponsor.
   const sponsor = sub.quest.sponsor_wallet?.toLowerCase();
   if (!sponsor || sponsor !== caller) {
     return NextResponse.json(
@@ -34,7 +42,6 @@ export async function POST(
     );
   }
 
-  // Idempotency: if already approved, return the existing tx.
   if (sub.tx_hash_approval) {
     return NextResponse.json({
       ok: true, skipped: true,
@@ -42,7 +49,13 @@ export async function POST(
       tx: sub.tx_hash_approval,
     });
   }
-
+  if (sub.status === SUBMISSION_STATUS.SPONSOR_APPROVED_PENDING_ADMIN) {
+    return NextResponse.json({
+      ok: true, skipped: true,
+      reason: "Already awaiting admin confirmation.",
+      route: "admin_confirm",
+    });
+  }
   if (sub.quest.onchain_quest_id === null && sub.quest.funded_quest_id === null) {
     return NextResponse.json(
       { error: "Quest has no onchain id — cannot approve." },
@@ -50,6 +63,35 @@ export async function POST(
     );
   }
 
+  // --- v1.2.1 trust gate ---
+  const trust = await getSponsorTrust(sponsor);
+  if (trust.level === "suspended") {
+    return NextResponse.json(
+      { error: "Your sponsor account is suspended. Contact admin." },
+      { status: 403 }
+    );
+  }
+  const decision = decideApprovalRoute({ sponsor: trust, quest: sub.quest });
+
+  // ---- Route A: admin confirmation required ----
+  if (decision.route === "admin_confirm") {
+    await prisma.submission.update({
+      where: { id: sub.id },
+      data: { status: SUBMISSION_STATUS.SPONSOR_APPROVED_PENDING_ADMIN },
+    });
+    await log("info", "sponsor.submissions.approve", "Routed to admin confirmation", {
+      submissionId: sub.id, sponsor, reason: decision.reason, trust_level: trust.level,
+    });
+    return NextResponse.json({
+      ok: true,
+      route: "admin_confirm",
+      reason: decision.reason,
+      trust_level: trust.level,
+      approvals_until_trusted: trust.approvals_until_trusted,
+    });
+  }
+
+  // ---- Route B: fire onchain directly (trusted + standard-value) ----
   try {
     const onchainQuestId = sub.quest.contract_version === 2
       ? sub.quest.funded_quest_id!
@@ -61,9 +103,6 @@ export async function POST(
       walletAddress: sub.wallet_address as `0x${string}`,
       repoUrl: sub.repo_url,
       demoUrl: sub.demo_url,
-      // Manual-review proofs may have no score yet — lift to min_score so the
-      // contract's score floor is satisfied. The EAS attestation records the
-      // true score (or 0) honestly via the riskBand = MANUAL_REVIEW tag.
       score: Math.max(sub.score ?? 0, sub.quest.min_score),
       existingProofHash: sub.proof_hash,
       questDbId: sub.quest.id,
@@ -82,11 +121,17 @@ export async function POST(
       },
     });
 
-    await log("info", "sponsor.submissions.approve", "Sponsor approved submission", {
-      submissionId: sub.id, sponsor, tx: result.txHashApproval,
+    await log("info", "sponsor.submissions.approve", "Sponsor approved (direct)", {
+      submissionId: sub.id, sponsor, tx: result.txHashApproval, trust_level: trust.level,
     });
 
-    return NextResponse.json({ ok: true, tx: result.txHashApproval, uid: result.attestationUid });
+    return NextResponse.json({
+      ok: true,
+      route: "onchain",
+      tx: result.txHashApproval,
+      uid: result.attestationUid,
+      reason: decision.reason,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await log("error", "sponsor.submissions.approve", "Approval failed", {

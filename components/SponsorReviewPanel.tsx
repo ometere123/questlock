@@ -31,6 +31,12 @@ const PROOF_LABEL: Record<string, string> = {
   lms_course:     "LMS Course",
 };
 
+interface SponsorTrust {
+  level: "new" | "trusted" | "flagged" | "suspended";
+  successful_confirmed_approvals: number;
+  approvals_until_trusted: number | null;
+}
+
 export default function SponsorReviewPanel({ questId }: { questId: string }) {
   const { authenticated, user } = usePrivy();
   const wallet = user?.wallet?.address;
@@ -39,6 +45,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
+  const [trust, setTrust] = useState<SponsorTrust | null>(null);
 
   const refresh = useCallback(async () => {
     if (!wallet) return;
@@ -56,6 +63,15 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
   }, [wallet, questId]);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  // v1.2.1 — fetch sponsor trust so we can show what will happen on Approve
+  useEffect(() => {
+    if (!wallet) return;
+    fetch(`/api/sponsor/trust-status?wallet=${wallet}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setTrust(d))
+      .catch(() => {});
+  }, [wallet]);
 
   async function act(id: string, action: "approve" | "reject") {
     setBusy(`${action}:${id}`);
@@ -197,7 +213,21 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
       )}
 
       <p className="text-[11px] mt-4" style={{ color: "var(--ql-bear)" }}>
-        Approving issues an EAS attestation tagged <span className="font-mono">MANUAL_REVIEW</span> and runs <span className="font-mono">submitAndApprove</span> via the verifier. The builder then claims their reward as normal.
+        {trust?.level === "trusted" && (
+          <>You&apos;re a <span className="font-semibold">trusted sponsor</span> — approvals fire onchain immediately (EAS attestation + <span className="font-mono">submitAndApprove</span>) unless the quest is high-value (reward × max_claims ≥ 500 QUEST), in which case admin co-signs.</>
+        )}
+        {trust?.level === "new" && (
+          <>You&apos;re a <span className="font-semibold">new sponsor</span> — your approvals route to admin confirmation first. <span className="font-mono">{trust.approvals_until_trusted ?? 3}</span> more admin-confirmed approvals until you&apos;re promoted to trusted (then approvals fire directly).</>
+        )}
+        {trust?.level === "flagged" && (
+          <>You&apos;re currently <span className="font-semibold">flagged</span> — all approvals route to admin confirmation until cleared.</>
+        )}
+        {trust?.level === "suspended" && (
+          <>You&apos;re <span className="font-semibold">suspended</span> — you cannot approve right now. Only reject works.</>
+        )}
+        {!trust && (
+          <>Approving issues an EAS attestation tagged <span className="font-mono">MANUAL_REVIEW</span> and runs <span className="font-mono">submitAndApprove</span>.</>
+        )}
       </p>
     </div>
   );

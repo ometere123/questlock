@@ -1,4 +1,20 @@
-# QuestLock — Known Limitations (v1.2)
+# QuestLock — Known Limitations (v1.2.1)
+
+## v1.2.1 sponsor trust model
+
+- **Tiered trust** — new sponsors start at `new`. First 3 manual approvals
+  route to admin confirmation. After 3 admin-confirmed approvals → promoted
+  to `trusted`; their approvals fire onchain immediately.
+- **High-value gate** — trusted sponsors still need admin confirmation when
+  a quest's max payout (reward × max_claims) ≥ 500 QUEST.
+- **Flagged / suspended** — admin-only toggle via the Confirmations page.
+  Flagged sponsors return to admin-confirmed approvals; suspended sponsors
+  cannot approve at all.
+- **Existing sponsors** at the time of v1.2.1 deploy start at `new` —
+  intentional, gives admin a few cycles to validate the flow before
+  promoting anyone.
+- Promotion is **automatic on threshold hit**. Demotion is **manual only**
+  (admin must flag or suspend).
 
 Honest list, in priority order. Everything here is a deliberate trade-off, not a bug.
 

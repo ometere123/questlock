@@ -33,6 +33,11 @@ export default function SponsorHome() {
   const [quests, setQuests] = useState<SponsorQuest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [trust, setTrust] = useState<{
+    level: "new" | "trusted" | "flagged" | "suspended";
+    successful_confirmed_approvals: number;
+    approvals_until_trusted: number | null;
+  } | null>(null);
   const wallet = user?.wallet?.address;
 
   useEffect(() => {
@@ -47,6 +52,11 @@ export default function SponsorHome() {
       .then((d) => setQuests(Array.isArray(d) ? d : []))
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
       .finally(() => setLoading(false));
+    // v1.2.1 — pull sponsor trust tier alongside the quest list
+    fetch(`/api/sponsor/trust-status?wallet=${wallet}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setTrust(d))
+      .catch(() => {});
   }, [wallet]);
 
   if (!authenticated) {
@@ -76,6 +86,43 @@ export default function SponsorHome() {
           <Link href="/create" className="px-5 py-2.5 rounded-full text-sm font-semibold"
             style={{ background: "#834A1F", color: "#F6F1EA" }}>+ Request quest</Link>
         </div>
+
+        {/* v1.2.1 — Sponsor trust banner */}
+        {trust && (
+          <div className="rounded-[18px] px-5 py-4 mb-6 flex items-center justify-between gap-3 flex-wrap"
+            style={
+              trust.level === "trusted"
+                ? { background: "#D9EDD9", color: "#2D5A2D", border: "1px solid #2D5A2D" }
+                : trust.level === "flagged"
+                ? { background: "#F0DADA", color: "#7A2020", border: "1px solid #6B3838" }
+                : trust.level === "suspended"
+                ? { background: "#6B3838", color: "#F0DADA", border: "1px solid #6B3838" }
+                : { background: "#FFF1D6", color: "#7A5A20", border: "1px solid #7A5A20" }
+            }>
+            <div>
+              <p className="text-xs uppercase tracking-widest font-semibold mb-1">
+                Sponsor trust · {trust.level}
+              </p>
+              <p className="text-sm">
+                {trust.level === "new" && (
+                  <>Your first {trust.approvals_until_trusted ?? 3} manual approval{(trust.approvals_until_trusted ?? 3) === 1 ? "" : "s"} require admin confirmation before reward fires.</>
+                )}
+                {trust.level === "trusted" && (
+                  <>Your approvals fire onchain immediately for standard-value quests. High-value quests (reward × max_claims ≥ 500 QUEST) still need admin sign-off.</>
+                )}
+                {trust.level === "flagged" && (
+                  <>Your approvals are temporarily routed back to admin confirmation. Contact admin to clear.</>
+                )}
+                {trust.level === "suspended" && (
+                  <>You cannot approve submissions right now. Reject still works. Contact admin.</>
+                )}
+              </p>
+            </div>
+            <span className="text-xs font-mono opacity-80">
+              {trust.successful_confirmed_approvals} confirmed approval{trust.successful_confirmed_approvals === 1 ? "" : "s"}
+            </span>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-4" aria-label="Loading sponsored quests">
