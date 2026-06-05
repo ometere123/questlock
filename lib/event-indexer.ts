@@ -22,7 +22,15 @@ const EVENT_SIGNATURES = [
   ),
 ];
 
-const BLOCK_WINDOW = 4000n;
+// Public Base Sepolia RPC caps eth_getLogs at 2000 blocks per call.
+// CHUNK_SIZE stays comfortably under that. INITIAL_LOOKBACK is the cold-start
+// window used on the very first run (no events indexed yet). MAX_CHUNKS_PER_RUN
+// bounds the work a single cron tick will do — if there's a huge backlog, the
+// next tick picks up where this one stopped (idempotent — we resume from the
+// max indexed block).
+const CHUNK_SIZE = 1900n;
+const INITIAL_LOOKBACK = 1900n;
+const MAX_CHUNKS_PER_RUN = 10;
 
 export async function indexContractEvents(): Promise<{
   scanned: bigint;
@@ -34,7 +42,7 @@ export async function indexContractEvents(): Promise<{
     transport: http(rpcUrl),
   });
 
-  // Find the most recent indexed block, or start from now - BLOCK_WINDOW
+  // Find the most recent indexed block, or start from now - INITIAL_LOOKBACK
   const latestEvent = await prisma.contractEvent.findFirst({
     orderBy: { block_number: "desc" },
   });
@@ -42,47 +50,64 @@ export async function indexContractEvents(): Promise<{
   const tipBlock = await publicClient.getBlockNumber();
   let fromBlock = latestEvent
     ? BigInt(latestEvent.block_number) + 1n
-    : tipBlock > BLOCK_WINDOW
-    ? tipBlock - BLOCK_WINDOW
+    : tipBlock > INITIAL_LOOKBACK
+    ? tipBlock - INITIAL_LOOKBACK
     : 0n;
 
-  let inserted = 0;
-
-  for (const event of EVENT_SIGNATURES) {
-    const logs = await publicClient.getLogs({
-      address: CONTRACT_ADDRESSES.QUESTLOCK_CORE,
-      event,
-      fromBlock,
-      toBlock: tipBlock,
-    });
-
-    for (const log of logs) {
-      const exists = await prisma.contractEvent.findFirst({
-        where: {
-          tx_hash: log.transactionHash,
-          event_name: event.name,
-        },
-      });
-      if (exists) continue;
-
-      const args = (log as unknown as { args: Record<string, unknown> }).args || {};
-
-      await prisma.contractEvent.create({
-        data: {
-          event_name: event.name,
-          tx_hash: log.transactionHash,
-          block_number: BigInt(log.blockNumber),
-          quest_id: (args.questId as bigint | undefined)?.toString() || null,
-          wallet_address:
-            (args.user as string | undefined) ||
-            (args.creator as string | undefined) ||
-            null,
-          payload_json: serializeBigInt(args) as object,
-        },
-      });
-      inserted++;
-    }
+  // If nothing new, return early — avoids issuing one no-op eth_getLogs per
+  // event signature against the RPC.
+  if (fromBlock > tipBlock) {
+    return { scanned: 0n, inserted: 0 };
   }
 
-  return { scanned: tipBlock - fromBlock, inserted };
+  const startBlock = fromBlock;
+  let inserted = 0;
+  let chunks = 0;
+
+  while (fromBlock <= tipBlock && chunks < MAX_CHUNKS_PER_RUN) {
+    const toBlock = fromBlock + CHUNK_SIZE - 1n > tipBlock
+      ? tipBlock
+      : fromBlock + CHUNK_SIZE - 1n;
+
+    for (const event of EVENT_SIGNATURES) {
+      const logs = await publicClient.getLogs({
+        address: CONTRACT_ADDRESSES.QUESTLOCK_CORE,
+        event,
+        fromBlock,
+        toBlock,
+      });
+
+      for (const log of logs) {
+        const exists = await prisma.contractEvent.findFirst({
+          where: {
+            tx_hash: log.transactionHash,
+            event_name: event.name,
+          },
+        });
+        if (exists) continue;
+
+        const args = (log as unknown as { args: Record<string, unknown> }).args || {};
+
+        await prisma.contractEvent.create({
+          data: {
+            event_name: event.name,
+            tx_hash: log.transactionHash,
+            block_number: BigInt(log.blockNumber),
+            quest_id: (args.questId as bigint | undefined)?.toString() || null,
+            wallet_address:
+              (args.user as string | undefined) ||
+              (args.creator as string | undefined) ||
+              null,
+            payload_json: serializeBigInt(args) as object,
+          },
+        });
+        inserted++;
+      }
+    }
+
+    fromBlock = toBlock + 1n;
+    chunks++;
+  }
+
+  return { scanned: fromBlock - startBlock, inserted };
 }
