@@ -30,12 +30,19 @@ export default async function LeaderboardPage() {
         {rows.length === 0 ? (
           <div className="rounded-[18px] p-10 text-center"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <p className="font-sans text-lg" style={{ color: "var(--ql-bighorn)" }}>No claims yet</p>
+            <p className="font-sans text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>No claims yet</p>
+            <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+              Be the first verified builder. Pass a quest and your wallet appears here automatically — no signup, no opt-in.
+            </p>
+            <a href="/quests" className="inline-block px-5 py-2.5 rounded-full text-sm font-semibold"
+              style={{ background: "#834A1F", color: "#F6F1EA" }}>
+              Browse open quests →
+            </a>
           </div>
         ) : (
-          <div className="rounded-[18px] overflow-hidden"
+          <div className="rounded-[18px] overflow-x-auto"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr style={{ background: "var(--muted)" }}>
                   {["#", "Builder", "Completed", "Avg score"].map((h) => (

@@ -32,15 +32,20 @@ export default function SponsorHome() {
   const { authenticated, user, login } = usePrivy();
   const [quests, setQuests] = useState<SponsorQuest[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const wallet = user?.wallet?.address;
 
   useEffect(() => {
     if (!wallet) return;
     setLoading(true);
+    setError(null);
     fetch(`/api/sponsor/quests?wallet=${wallet}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Failed (HTTP ${r.status})`);
+        return r.json();
+      })
       .then((d) => setQuests(Array.isArray(d) ? d : []))
-      .catch(() => {})
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
       .finally(() => setLoading(false));
   }, [wallet]);
 
@@ -73,7 +78,23 @@ export default function SponsorHome() {
         </div>
 
         {loading ? (
-          <p className="text-sm" style={{ color: "var(--ql-bear)" }}>Loading…</p>
+          <div className="space-y-4" aria-label="Loading sponsored quests">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-[18px] p-6 animate-pulse"
+                style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+                <div className="h-4 w-2/3 rounded mb-3" style={{ background: "var(--muted)" }} />
+                <div className="h-3 w-1/3 rounded" style={{ background: "var(--muted)" }} />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="rounded-[18px] p-6 text-center"
+            style={{ background: "#3F1F1F", border: "1px solid #6B3838", color: "#F0DADA" }}>
+            <p className="text-sm mb-3">Couldn&apos;t load your sponsored quests.</p>
+            <p className="text-xs mb-4 opacity-80">{error}</p>
+            <button onClick={() => location.reload()} className="px-4 py-2 rounded-full text-xs font-medium"
+              style={{ background: "#834A1F", color: "#F6F1EA" }}>Retry</button>
+          </div>
         ) : quests.length === 0 ? (
           <div className="rounded-[18px] p-10 text-center"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>

@@ -54,7 +54,171 @@ async function getPublicProof(id: string) {
     },
   });
   if (!submission || !isPubliclyVisible(submission.status)) return null;
-  return toPublicProof(submission);
+  // toPublicProof tolerates the extra proof_type / evidence_json fields.
+  return toPublicProof(submission as Parameters<typeof toPublicProof>[0]);
+}
+
+const PROOF_TYPE_LABELS: Record<string, string> = {
+  github_project: "GitHub Project",
+  manual_project: "Manual Project",
+  discord_role:   "Discord Role",
+  x_post:         "X / Twitter Post",
+  lms_course:     "LMS / Course Completion",
+};
+
+function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<typeof getPublicProof>>> }) {
+  const ev = proof.evidence_public ?? {};
+  // Common header
+  const wrapperStyle = { background: "var(--card)", border: "1px solid var(--border)" };
+
+  // Render per proof type. Each block stays in the public-safe whitelist.
+  if (proof.proof_type === "github_project") {
+    return (
+      <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+          Submitted Work · GitHub Project
+        </p>
+        <div className="space-y-2 text-sm">
+          <a href={proof.repo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+            {proof.repo_url}
+          </a>
+          {proof.demo_url && (
+            <a href={proof.demo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+              {proof.demo_url}
+            </a>
+          )}
+          {(ev.language || ev.default_branch || ev.commits_after_start) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 text-xs" style={{ borderTop: "1px solid var(--border)" }}>
+              {ev.language && <FactCell k="Language" v={String(ev.language)} />}
+              {ev.default_branch && <FactCell k="Default branch" v={String(ev.default_branch)} />}
+              {ev.commits_after_start !== null && ev.commits_after_start !== undefined && (
+                <FactCell k="Commits after start" v={String(ev.commits_after_start)} />
+              )}
+              {ev.readme_chars !== null && ev.readme_chars !== undefined && (
+                <FactCell k="README chars" v={String(ev.readme_chars)} />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (proof.proof_type === "manual_project") {
+    return (
+      <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+          Submitted Work · Manual Project
+        </p>
+        <div className="space-y-2 text-sm">
+          {ev.project_title && (
+            <p className="font-semibold" style={{ color: "var(--ql-bighorn)" }}>{String(ev.project_title)}</p>
+          )}
+          {ev.demo_url && (
+            <a href={String(ev.demo_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+              {String(ev.demo_url)}
+            </a>
+          )}
+          {ev.supporting_link && (
+            <a href={String(ev.supporting_link)} target="_blank" rel="noopener noreferrer" className="block break-all text-xs" style={{ color: "#834A1F" }}>
+              Supporting: {String(ev.supporting_link)}
+            </a>
+          )}
+          <p className="text-xs pt-2 italic" style={{ color: "var(--ql-bear)" }}>
+            Admin-reviewed. Submitter explanation kept private.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (proof.proof_type === "discord_role") {
+    return (
+      <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+          Submitted Work · Discord Role
+        </p>
+        <div className="space-y-2 text-sm">
+          {ev.discord_username && <FactRow k="Discord handle" v={String(ev.discord_username)} />}
+          {ev.guild_name && <FactRow k="Guild" v={String(ev.guild_name)} />}
+          {ev.role_name && <FactRow k="Role" v={String(ev.role_name)} />}
+          {!ev.discord_username && !ev.guild_name && !ev.role_name && (
+            <p className="text-xs italic" style={{ color: "var(--ql-bear)" }}>
+              Discord membership verified.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (proof.proof_type === "x_post") {
+    return (
+      <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+          Submitted Work · X / Twitter Post
+        </p>
+        <div className="space-y-2 text-sm">
+          {ev.handle && <FactRow k="Handle" v={String(ev.handle)} />}
+          {ev.post_url && (
+            <a href={String(ev.post_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+              {String(ev.post_url)}
+            </a>
+          )}
+          {ev.post_id && <FactRow k="Post ID" v={String(ev.post_id)} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (proof.proof_type === "lms_course") {
+    return (
+      <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+          Submitted Work · Course Completion
+        </p>
+        <div className="space-y-2 text-sm">
+          {ev.platform && <FactRow k="Platform" v={String(ev.platform)} />}
+          {ev.certificate_url && (
+            <a href={String(ev.certificate_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+              {String(ev.certificate_url)}
+            </a>
+          )}
+          {ev.completion_id && <FactRow k="Completion ID" v={String(ev.completion_id)} />}
+        </div>
+      </div>
+    );
+  }
+
+  // Unknown proof type — graceful fallback.
+  return (
+    <div className="rounded-[18px] p-6 mb-6" style={wrapperStyle}>
+      <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
+        Submitted Work
+      </p>
+      <p className="text-sm" style={{ color: "var(--ql-derby)" }}>
+        Proof type: {PROOF_TYPE_LABELS[proof.proof_type] || proof.proof_type}
+      </p>
+    </div>
+  );
+}
+
+function FactCell({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase" style={{ color: "var(--ql-bear)" }}>{k}</p>
+      <p className="text-xs font-mono" style={{ color: "var(--ql-bighorn)" }}>{v}</p>
+    </div>
+  );
+}
+
+function FactRow({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span style={{ color: "var(--ql-bear)" }}>{k}</span>
+      <span className="font-mono text-xs" style={{ color: "var(--ql-bighorn)" }}>{v}</span>
+    </div>
+  );
 }
 
 export async function generateMetadata({
@@ -94,7 +258,7 @@ export default async function PublicProofPage({
   const subjectLabel = proof.github_login ? `@${proof.github_login}` : shortWallet;
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <Link href="/quests" className="text-sm" style={{ color: "var(--ql-bear)" }}>
@@ -114,7 +278,7 @@ export default async function PublicProofPage({
 
         {/* Hero certificate card */}
         <div
-          className="rounded-[18px] p-10 mb-6"
+          className="rounded-[18px] p-6 sm:p-10 mb-6"
           style={{ background: "var(--ql-bighorn)" }}
         >
           <p
@@ -258,39 +422,18 @@ export default async function PublicProofPage({
           </div>
         </div>
 
-        {/* Submitted artefacts */}
-        <div
-          className="rounded-[18px] p-6 mb-6"
-          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
-        >
-          <p
-            className="text-xs uppercase tracking-widest mb-3"
-            style={{ color: "var(--ql-bear)" }}
+        {/* Submitted artefacts — adapter-aware */}
+        <SubmittedArtefacts proof={proof} />
+
+        {/* Proof type chip */}
+        <div className="mb-6 flex items-center gap-2 text-xs">
+          <span className="uppercase tracking-widest" style={{ color: "var(--ql-bear)" }}>Proof type</span>
+          <span
+            className="px-2 py-0.5 rounded-full font-semibold"
+            style={{ background: "#22150C", color: "#F6F1EA" }}
           >
-            Submitted Work
-          </p>
-          <div className="space-y-2 text-sm">
-            <a
-              href={proof.repo_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block break-all"
-              style={{ color: "#834A1F" }}
-            >
-              {proof.repo_url}
-            </a>
-            {proof.demo_url && (
-              <a
-                href={proof.demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block break-all"
-                style={{ color: "#834A1F" }}
-              >
-                {proof.demo_url}
-              </a>
-            )}
-          </div>
+            {PROOF_TYPE_LABELS[proof.proof_type] || proof.proof_type}
+          </span>
         </div>
 
         {/* Proof checks */}
@@ -300,10 +443,14 @@ export default async function PublicProofPage({
         >
           <div className="px-6 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
             <p className="font-sans text-base font-semibold" style={{ color: "var(--ql-bighorn)" }}>
-              Objective Proof Checks
+              Proof Checks
             </p>
             <p className="text-xs mt-1" style={{ color: "var(--ql-bear)" }}>
-              Pass mark: {proof.quest.min_score} / {totalMax} · all checks are deterministic
+              {proof.proof_type === "github_project"
+                ? `Pass mark: ${proof.quest.min_score} / ${totalMax} · all checks are deterministic`
+                : proof.proof_type === "discord_role"
+                ? `Pass mark: ${proof.quest.min_score} / ${totalMax} · deterministic when bot token configured, otherwise admin-verified`
+                : `Pass mark: ${proof.quest.min_score} / ${totalMax} · admin-verified proof`}
             </p>
           </div>
           <table className="w-full text-sm">
