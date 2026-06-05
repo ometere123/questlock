@@ -12,6 +12,11 @@ export default function Navbar() {
     ? `${walletAddr.slice(0, 6)}…${walletAddr.slice(-4)}`
     : null;
 
+  // Admin creates quests directly via /ops-ql Create Quest tab and doesn't
+  // need the public sponsor "request" form. Hide the link to avoid confusion
+  // between the two creation paths.
+  const isAdmin = walletAddr?.toLowerCase() === "0x1f63ea74065586af0c7c48428372d88d0a89525b";
+
   return (
     <nav
       style={{ backgroundColor: "var(--ql-bighorn)" }}
@@ -40,7 +45,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto">
+        <div className="flex items-center gap-3 sm:gap-6">
           <Link
             href="/quests"
             className="text-sm font-medium transition-colors"
@@ -48,13 +53,15 @@ export default function Navbar() {
           >
             Quests
           </Link>
-          <Link
-            href="/create"
-            className="text-sm font-medium transition-colors"
-            style={{ color: "var(--ql-ashen)" }}
-          >
-            Create
-          </Link>
+          {!isAdmin && (
+            <Link
+              href="/create"
+              className="text-sm font-medium transition-colors"
+              style={{ color: "var(--ql-ashen)" }}
+            >
+              Create
+            </Link>
+          )}
           <Link
             href="/leaderboard"
             className="text-sm font-medium transition-colors"
