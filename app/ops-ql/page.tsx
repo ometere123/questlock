@@ -272,7 +272,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--ql-bighorn)" }}>
-      <div className="max-w-6xl mx-auto py-10 px-6">
+      <div className="max-w-6xl mx-auto py-6 sm:py-10 px-4 sm:px-6">
         <h1 className="font-serif text-3xl font-bold mb-8" style={{ color: "#F6F1EA" }}>
           Admin Dashboard
         </h1>

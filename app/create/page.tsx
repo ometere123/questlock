@@ -165,7 +165,7 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
         <h1 className="font-sans text-4xl font-bold mb-2" style={{ color: "var(--ql-bighorn)" }}>
           Request a Quest
@@ -272,7 +272,7 @@ export default function CreatePage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <label style={labelStyle}>Reward (QUEST)</label>
                 <input
@@ -323,7 +323,7 @@ export default function CreatePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label style={labelStyle}>Deadline (days)</label>
                 <input

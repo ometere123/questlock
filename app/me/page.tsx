@@ -87,7 +87,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="min-h-screen py-10 px-6"
+      className="min-h-screen py-6 sm:py-10 px-4 sm:px-6"
       style={{ background: "var(--background)" }}
     >
       <div className="max-w-4xl mx-auto">

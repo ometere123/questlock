@@ -113,7 +113,7 @@ export default function RetryCentre() {
   }
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--ql-bighorn)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--ql-bighorn)" }}>
       <div className="max-w-5xl mx-auto">
         <Link href="/ops-ql" className="text-sm mb-4 inline-block" style={{ color: "var(--ql-cafe)" }}>
           ← Admin

@@ -100,7 +100,7 @@ export default function SubmitResultPage() {
   const minScore = data.quest?.min_score ?? 70;
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-serif text-2xl font-bold" style={{ color: "var(--ql-bighorn)" }}>

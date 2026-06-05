@@ -121,7 +121,7 @@ export default function AdminSubmissionDetail() {
   }
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--ql-bighorn)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--ql-bighorn)" }}>
       <div className="max-w-4xl mx-auto">
         <Link href="/ops-ql" className="text-sm mb-6 inline-block" style={{ color: "var(--ql-cafe)" }}>
           ← Back to Admin

@@ -61,7 +61,7 @@ export default async function QuestDetailPage({
   }));
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-4xl mx-auto">
         <Link
           href="/quests"

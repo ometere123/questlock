@@ -72,7 +72,7 @@ export default function SponsorHome() {
   }
 
   return (
-    <div className="min-h-screen py-10 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

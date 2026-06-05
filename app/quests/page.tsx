@@ -22,7 +22,7 @@ export default async function QuestsPage() {
   const quests = await getQuests();
 
   return (
-    <div className="min-h-screen py-16 px-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen py-10 sm:py-16 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
           <h1 className="font-sans text-4xl font-bold mb-3" style={{ color: "var(--ql-bighorn)" }}>
