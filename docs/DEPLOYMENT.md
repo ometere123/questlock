@@ -14,7 +14,7 @@
   - Discord OAuth App (optional, required for `discord_role` proofs) — Authorization callback `${NEXT_PUBLIC_APP_URL}/api/auth/discord/callback`
   - Discord Bot token (optional, enables deterministic guild-role checks; without it `discord_role` falls back to manual review)
   - Second contract deploy: QuestLockCoreV2 (`scripts/deploy-v2.ts`) — grant `MINTER_ROLE` on Badge to V2 and `VERIFIER_ROLE` on V2 to the verifier wallet
-  - Vercel Cron entry already in `vercel.json` (`/api/indexer?key=cron` every 15 min) — no manual setup beyond enabling Cron on the Vercel project
+  - External cron service (e.g. https://cron-job.org) configured to hit `https://<your-domain>/api/indexer` on the cadence you want (15 min recommended), sending header `x-indexer-secret: <value of INDEXER_SECRET env var>`. Vercel native cron is NOT used (Hobby tier caps at 1 run/day).
 
 ### v1.2 env vars
 

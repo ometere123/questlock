@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { indexContractEvents } from "@/lib/event-indexer";
 
 // /api/indexer
-// Two authorised callers:
-//   1. Manual admin call: header `x-indexer-secret` matches INDEXER_SECRET.
-//   2. Vercel Cron (GET with `?key=cron`): header `x-vercel-cron: 1` is set
-//      by Vercel on cron-originated requests, plus presence of the literal
-//      `key=cron` query param. We don't need a real secret in the URL because
-//      the `x-vercel-cron` header is only set by Vercel's edge.
+// Authorised by `x-indexer-secret` header matching the INDEXER_SECRET env var.
+// Two callers in production:
+//   1. Manual admin trigger via the Retry Centre ("Run indexer now" button).
+//   2. External cron service (e.g. cron-job.org) hitting this URL with the
+//      `x-indexer-secret` header. Vercel native cron was removed because the
+//      Hobby tier caps it at one run/day which was too coarse for our needs.
 function authorise(req: NextRequest): boolean {
   const header = req.headers.get("x-indexer-secret");
-  if (process.env.INDEXER_SECRET && header === process.env.INDEXER_SECRET) return true;
-  const isVercelCron = req.headers.get("x-vercel-cron") === "1";
-  const keyParam = req.nextUrl.searchParams.get("key");
-  if (isVercelCron && keyParam === "cron") return true;
-  return false;
+  return Boolean(process.env.INDEXER_SECRET && header === process.env.INDEXER_SECRET);
 }
 
 async function run(req: NextRequest) {

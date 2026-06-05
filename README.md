@@ -275,7 +275,7 @@ npm run contracts:seed-quest       # Fund + create sample quest
 - **Admin Retry Centre** — `/ops-ql/retry` has one-click idempotent retry for proof check, attestation, onchain approval, and indexer.
 - **Discord OAuth scaffold** — `/api/auth/discord/*`, HMAC-signed state cookies. Required for `discord_role` proofs.
 - **Durable rate limits** — Supabase-backed `rate_limit_buckets` with in-process fallback.
-- **Scheduled indexer** — Vercel Cron hits `/api/indexer?key=cron` every 15 minutes.
+- **Scheduled indexer** — external cron service (e.g. cron-job.org) hits `/api/indexer` with the `x-indexer-secret` header. Vercel native cron was removed (Hobby tier caps at 1 run/day). The Retry Centre also has a manual "Run indexer now" button.
 
 ### v1.2 contract & DB additions
 

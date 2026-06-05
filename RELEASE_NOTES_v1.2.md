@@ -112,8 +112,8 @@ The public certificate page now dispatches by `proof_type` and renders a per-typ
 
 ### 12. Scheduled indexer
 
-- `vercel.json` cron entry: `/api/indexer?key=cron` every 15 minutes.
-- The route accepts the `x-vercel-cron: 1` header set by Vercel's edge plus the literal `key=cron` query param — no secret-in-URL needed.
+- External cron service (cron-job.org or similar) hits `/api/indexer` with the `x-indexer-secret` header on whatever interval the operator chooses.
+- Vercel native cron was attempted but removed — the Hobby tier caps native cron at one run per day, too coarse for fresh event indexing. The Retry Centre also exposes a manual "Run indexer now" button for on-demand catch-up.
 
 ## Verification (this release)
 
@@ -154,7 +154,7 @@ app/api/proof/multi/route.ts           # non-github adapter dispatch
 app/api/quests/[id]/funding/route.ts   # live funding state
 prisma/migrations/20260605000000_v12_sponsor_funded/migration.sql
 prisma/seed.ts                         # quest templates upsert
-vercel.json                            # cron schedule
+app/api/indexer/route.ts               # x-indexer-secret authed; called by external cron
 ```
 
 ## Out of scope (deliberately, per brief)
