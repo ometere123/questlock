@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       sponsor_name,
       sponsor_email,
       sponsor_wallet,
+      proof_type,                   // v1.2 — adapter selection
     } = body;
 
     if (!title || !description || !reward_amount || !sponsor_wallet) {
@@ -64,6 +65,9 @@ export async function POST(req: NextRequest) {
         sponsor_name: sponsor_name ? String(sponsor_name).slice(0, 120) : null,
         sponsor_email: sponsor_email ? String(sponsor_email).slice(0, 200) : null,
         sponsor_wallet: wallet,
+        proof_type: ["github_project","manual_project","discord_role","x_post","lms_course"].includes(String(proof_type))
+          ? String(proof_type)
+          : "github_project",
         status: "PENDING_REVIEW",
       },
     });

@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
       title,
       description,
       quest_type = "github_project",
+      proof_type,                   // v1.2 — adapter selection
+      contract_version = 2,         // v1.2 — default V2 (V1 retired from new quests)
       requirements_json = {},
       scoring_rubric_json = {},
       min_score = 70,
@@ -38,6 +40,7 @@ export async function POST(req: NextRequest) {
       max_claims = 100,
       onchain_quest_id,
       created_by,
+      sponsor_wallet,
     } = body;
 
     if (!title || !reward_amount || !deadline || !created_by) {
@@ -47,11 +50,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // v1.2 — proof_type defaults to legacy quest_type so old admin calls keep working.
+    const resolvedProofType = proof_type ?? quest_type ?? "github_project";
+    const resolvedVersion = Number(contract_version) === 1 ? 1 : 2;
+
     const quest = await prisma.quest.create({
       data: {
         title,
         description: description || "",
         quest_type,
+        proof_type: resolvedProofType,
+        contract_version: resolvedVersion,
         requirements_json,
         scoring_rubric_json,
         min_score,
@@ -63,7 +72,9 @@ export async function POST(req: NextRequest) {
         max_claims,
         onchain_quest_id: onchain_quest_id ? BigInt(onchain_quest_id) : null,
         created_by,
+        sponsor_wallet: sponsor_wallet ? String(sponsor_wallet).toLowerCase() : null,
         status: "active",
+        funding_status: resolvedVersion === 2 ? "UNFUNDED" : "LEGACY_SHARED",
       },
     });
 

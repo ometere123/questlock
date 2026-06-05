@@ -50,6 +50,7 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    proof_type: "github_project",       // v1.2 — adapter selection
     reward_amount: "10",
     badge_id: "1",
     min_score: "70",
@@ -77,6 +78,9 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
         },
         body: JSON.stringify({
           ...form,
+          // v1.2 — explicitly carry the new fields the API now accepts.
+          quest_type: form.proof_type,
+          contract_version: 2,
           created_by: user?.wallet?.address || "admin",
         }),
       });
@@ -145,6 +149,20 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Build and deploy a project with a frontend, contracts, and working demo."
           />
+        </div>
+        <div className="col-span-2">
+          <label style={labelStyle}>Proof Type *</label>
+          <select className={inputCls} style={inputStyle} value={form.proof_type}
+            onChange={(e) => setForm({ ...form, proof_type: e.target.value })}>
+            <option value="github_project">GitHub Project (deterministic 10-check scoring)</option>
+            <option value="manual_project">Manual Project (admin review)</option>
+            <option value="discord_role">Discord Role (auto when bot token configured, else admin)</option>
+            <option value="x_post">X / Twitter Post (URL parse + admin review)</option>
+            <option value="lms_course">LMS Course (admin review)</option>
+          </select>
+          <p className="text-[10px] mt-1" style={{ color: "var(--ql-bear)" }}>
+            Builders see the matching submit form on the quest page. All new quests use V2 (sponsor-funded) routing.
+          </p>
         </div>
         <div>
           <label style={labelStyle}>Reward Amount (QUEST)</label>

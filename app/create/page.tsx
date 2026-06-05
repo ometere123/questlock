@@ -15,6 +15,28 @@ interface MyRequest {
   created_at: string;
 }
 
+// v1.2 — quest template returned by GET /api/templates
+interface QuestTemplate {
+  id: string;
+  key: string;
+  title: string;
+  description: string;
+  proof_type: string;
+  default_min_score: number;
+  default_badge_id: number;
+  default_reward_amount: string;
+  default_max_claims: number;
+  default_deadline_days: number;
+}
+
+const PROOF_TYPE_LABEL: Record<string, string> = {
+  github_project: "GitHub Project",
+  manual_project: "Manual Project",
+  discord_role:   "Discord Role",
+  x_post:         "X / Twitter Post",
+  lms_course:     "LMS Course",
+};
+
 const STATUS_LABEL: Record<string, { text: string; tone: "warn" | "ok" | "error" | "info" }> = {
   PENDING_REVIEW: { text: "Pending review", tone: "warn" },
   APPROVED: { text: "Approved · awaiting publish", tone: "info" },
@@ -39,6 +61,7 @@ export default function CreatePage() {
     title: "",
     description: "",
     requirements: "",
+    proof_type: "github_project",
     reward_amount: "10",
     badge_id: "1",
     min_score: "70",
@@ -50,6 +73,30 @@ export default function CreatePage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ ok?: boolean; error?: string } | null>(null);
   const [myRequests, setMyRequests] = useState<MyRequest[]>([]);
+  const [templates, setTemplates] = useState<QuestTemplate[]>([]);
+
+  // Load templates once on mount — used to power the "starter templates" row.
+  useEffect(() => {
+    fetch("/api/templates")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => setTemplates(Array.isArray(d) ? d : []))
+      .catch(() => setTemplates([]));
+  }, []);
+
+  function applyTemplate(t: QuestTemplate) {
+    setForm((f) => ({
+      ...f,
+      title: t.title,
+      description: t.description,
+      requirements: "",
+      proof_type: t.proof_type,
+      reward_amount: t.default_reward_amount,
+      badge_id: String(t.default_badge_id),
+      min_score: String(t.default_min_score),
+      max_claims: String(t.default_max_claims),
+      deadline_days: String(t.default_deadline_days),
+    }));
+  }
 
   async function refreshMine() {
     if (!wallet) return;
@@ -79,6 +126,8 @@ export default function CreatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          // proof_type already in `form` — kept here for clarity
+          proof_type: form.proof_type,
           badge_id: Number(form.badge_id),
           min_score: Number(form.min_score),
           max_claims: Number(form.max_claims),
@@ -148,6 +197,46 @@ export default function CreatePage() {
             className="rounded-[18px] p-7 mb-8 space-y-5"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
+            {/* v1.2 — starter template chips */}
+            {templates.length > 0 && (
+              <div>
+                <label style={labelStyle}>Start from a template</label>
+                <div className="flex flex-wrap gap-2">
+                  {templates.map((t) => (
+                    <button key={t.id} type="button" onClick={() => applyTemplate(t)}
+                      className="text-xs px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
+                      style={{ background: "var(--muted)", color: "var(--ql-bighorn)", border: "1px solid var(--border)" }}
+                      title={t.description}>
+                      {t.title}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] mt-2" style={{ color: "var(--ql-bear)" }}>
+                  Click a template to pre-fill the form. You can edit anything afterwards.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label style={labelStyle}>Proof type *</label>
+              <select
+                className={inputCls}
+                style={inputStyle}
+                value={form.proof_type}
+                onChange={(e) => setForm({ ...form, proof_type: e.target.value })}
+              >
+                <option value="github_project">GitHub Project — deterministic 10-check scoring</option>
+                <option value="manual_project">Manual Project — admin reviews submission</option>
+                <option value="discord_role">Discord Role — auto-verify with bot token, else manual</option>
+                <option value="x_post">X / Twitter Post — URL parse + admin review (free tier)</option>
+                <option value="lms_course">LMS Course — admin verifies certificate</option>
+              </select>
+              <p className="text-[11px] mt-1" style={{ color: "var(--ql-bear)" }}>
+                Selects which form builders see and how their submission is verified. Currently set:{" "}
+                <span className="font-semibold">{PROOF_TYPE_LABEL[form.proof_type]}</span>.
+              </p>
+            </div>
+
             <div>
               <label style={labelStyle}>Quest title *</label>
               <input
