@@ -3,4 +3,5 @@
 /* eslint-disable */
 export { QuestBadge__factory } from './QuestBadge__factory.js';
 export { QuestLockCore__factory } from './QuestLockCore__factory.js';
+export { QuestLockCoreV2__factory } from './QuestLockCoreV2__factory.js';
 export { QuestRewardToken__factory } from './QuestRewardToken__factory.js';

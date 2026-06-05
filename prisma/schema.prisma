@@ -47,6 +47,15 @@ model Quest {
   // block both the publishing admin and the original sponsor from
   // participating in their own quest.
   sponsor_wallet   String?
+  // v1.2: contract-version routing + per-quest funding accounting + proof type
+  contract_version       Int      @default(1)  // 1 = legacy QuestLockCore, 2 = QuestLockCoreV2
+  funded_quest_id        BigInt?               // onchain id on V2 (NULL for legacy)
+  funding_status         String   @default("LEGACY_SHARED")
+  required_funding       String?
+  funded_amount          String?  @default("0")
+  claimed_amount_onchain String?  @default("0")
+  withdrawn_amount       String?  @default("0")
+  proof_type             String   @default("github_project")
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -72,6 +81,9 @@ model Submission {
   eas_attestation_uid  String?
   tx_hash_approval     String?
   tx_hash_claim        String?
+  // v1.2: per-submission proof type + adapter evidence payload
+  proof_type      String   @default("github_project")
+  evidence_json   Json?    @default("{}")
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -167,6 +179,10 @@ model QuestRequest {
   sponsor_name    String?
   sponsor_email   String?
   sponsor_wallet  String
+  // v1.2: proof type + funding fields for sponsor flow
+  proof_type       String   @default("github_project")
+  required_funding String?
+  funded_amount    String?  @default("0")
   // lifecycle: PENDING_REVIEW | APPROVED | REJECTED | PUBLISHING | PUBLISHED | PUBLISH_FAILED
   status              String   @default("PENDING_REVIEW")
   admin_notes         String?
@@ -195,4 +211,64 @@ model SystemLog {
   created_at    DateTime @default(now())
 
   @@map("system_logs")
+}
+
+// v1.2 — durable rate-limit bucket (Supabase-backed)
+model RateLimitBucket {
+  id             String   @id @default(uuid())
+  key            String
+  route          String
+  window_start   DateTime
+  window_seconds Int
+  count          Int      @default(0)
+  limit          Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  @@unique([key, route, window_start])
+  @@map("rate_limit_buckets")
+}
+
+// v1.2 — in-app notifications
+model Notification {
+  id             String    @id @default(uuid())
+  wallet_address String
+  type           String
+  title          String
+  message        String
+  metadata_json  Json?     @default("{}")
+  read_at        DateTime?
+  created_at     DateTime  @default(now())
+  @@index([wallet_address, read_at])
+  @@map("notifications")
+}
+
+// v1.2 — Discord OAuth linking
+model DiscordConnection {
+  id                 String    @id @default(uuid())
+  wallet_address     String    @unique
+  discord_id         String    @unique
+  discord_username   String
+  discord_avatar_url String?
+  connected_at       DateTime  @default(now())
+  revoked_at         DateTime?
+  @@map("discord_connections")
+}
+
+// v1.2 — quest templates (admin/sponsor presets)
+model QuestTemplate {
+  id                    String   @id @default(uuid())
+  key                   String   @unique
+  title                 String
+  description           String
+  proof_type            String
+  requirements_json     Json?    @default("{}")
+  scoring_rubric_json   Json?    @default("{}")
+  default_min_score     Int      @default(70)
+  default_badge_id      Int      @default(1)
+  default_reward_amount String   @default("10")
+  default_max_claims    Int      @default(50)
+  default_deadline_days Int      @default(30)
+  suggested_copy_json   Json?    @default("{}")
+  created_at            DateTime @default(now())
+  @@map("quest_templates")
 }

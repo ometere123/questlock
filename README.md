@@ -10,11 +10,14 @@ QuestLock is a deterministic proof-powered quest platform on Base Sepolia. Users
 
 | Contract | Address |
 |---|---|
-| QuestLockCore | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` |
+| QuestLockCore (v1, legacy shared pool) | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` |
+| **QuestLockCoreV2** (v1.2, per-quest funded) | `0xDDC0024E76C2bEC64F6f7785e232E7Ce11b0A282` |
 | QuestRewardToken | `0x154250cc3253b4C7a0f1bfe0eCc26792c81b3054` |
 | QuestBadge | `0x1010F4fB73b2DCb4b2bD43D87E0210cb6a00bBAe` |
 | EAS Contract | `0x4200000000000000000000000000000000000021` |
 | EAS Schema UID | `0x3c9b890e57a3887a0766fe0bf74df896e9551d7b173b3113e3363149156940a6` |
+
+Legacy V1 quests continue to run on the original `QuestLockCore`. New quests created via the v1.2 sponsor flow route to **V2**. The EAS schema is shared. See `RELEASE_NOTES_v1.2.md`.
 
 ## Architecture
 
@@ -257,26 +260,48 @@ npm run contracts:grant-roles      # Grant VERIFIER_ROLE
 npm run contracts:seed-quest       # Fund + create sample quest
 ```
 
-## Known Limitations (v1)
+## v1.2 — Sponsor-funded multi-proof release
 
-- GitHub proof only (no Twitter/X, Discord, LMS)
-- Base Sepolia testnet only (no mainnet, no multi-chain)
-- Deterministic scoring only (no AI/LLM evaluation)
-- No real KYC or identity verification
-- No manual appeal queue (admin can reject/approve via contract directly)
-- Demo URL check requires a publicly accessible URL
-- Gasless claim implemented via verifier-signed `claimRewardFor` (not Gelato Relay — Gelato SDK lodash-es ESM conflict was unresolvable; user still pays no gas)
+> Full notes in `RELEASE_NOTES_v1.2.md`. Known limitations in `KNOWN_LIMITATIONS.md`.
+
+- **QuestLockCoreV2** — per-quest funded pool. Sponsors fund their own quest; rewards never come from a shared bag. State machine: `UNFUNDED → PARTIALLY_FUNDED → FUNDED → UNDERFUNDED → CLOSED / REFUNDED`. Sponsor can withdraw unused funds after deadline.
+- **Contract-version routing** — `quests.contract_version` (1 or 2) + `lib/contracts.ts#coreAddressFor` route all approve/claim/funding calls. Legacy V1 quests are untouched.
+- **5 proof adapters** via `lib/adapters/*` — `github_project` (existing v1.1 logic, unchanged), `manual_project`, `discord_role`, `x_post`, `lms_course`. All implement the same `ProofAdapter` interface (`validateInput`, `fetchEvidence`, `scoreEvidence`, `buildPublicProofPayload`, `buildPrivateEvidence`).
+- **Sponsor dashboard** — `/sponsor` lists your funded quests; `/sponsor/quests/[id]` lets you fund, top up, withdraw unused, and close. All transactions signed by your connected wallet — no backend keys touch sponsor funds.
+- **Public leaderboard** — `/leaderboard`, proof-backed, only completed quests count.
+- **In-app notifications** — bell in Navbar polls `/api/notifications` every 30s; mark-one-read on click, mark-all-read button.
+- **Quest templates** — 5 seeded presets at `/api/templates` (one per proof type) that sponsors can clone.
+- **Adapter-aware `/proof/[id]`** — public certificate page renders per-type fields from the adapter whitelist. No private evidence ever leaks.
+- **Admin Retry Centre** — `/ops-ql/retry` has one-click idempotent retry for proof check, attestation, onchain approval, and indexer.
+- **Discord OAuth scaffold** — `/api/auth/discord/*`, HMAC-signed state cookies. Required for `discord_role` proofs.
+- **Durable rate limits** — Supabase-backed `rate_limit_buckets` with in-process fallback.
+- **Scheduled indexer** — Vercel Cron hits `/api/indexer?key=cron` every 15 minutes.
+
+### v1.2 contract & DB additions
+
+- `contracts/QuestLockCoreV2.sol` — `viaIR: true` build, atomic `submitAndApprove` + `claimReward`, per-quest funding accounting.
+- Additive Prisma migration `20260605000000_v12_sponsor_funded`:
+  - `quests`: `contract_version`, `funded_quest_id`, `funding_status`, `required_funding`, `funded_amount`, `claimed_amount_onchain`, `withdrawn_amount`, `proof_type`
+  - `submissions`: `proof_type`, `evidence_json`
+  - `quest_requests`: `proof_type`, `required_funding`, `funded_amount`
+  - new tables: `rate_limit_buckets`, `notifications`, `discord_connections`, `quest_templates`
+- No legacy column changed, no constraint dropped, no schema migration risk.
+
+## Known Limitations
+
+See `KNOWN_LIMITATIONS.md` for the full v1.2 list. Highlights:
+
+- GitHub proof is the only fully deterministic adapter. Manual / X / LMS default to admin review; Discord is deterministic only when `DISCORD_BOT_TOKEN` is configured.
+- Base Sepolia testnet only — no mainnet, no multi-chain.
+- No paid X API integration (free tier doesn't return post content).
+- The old verifier wallet remains authorised on V1 as a rollback path — rotation cut-over is deliberate.
 
 ## Future Improvements
 
-- Discord proof, Twitter/X proof, LMS proof
-- Multi-chain reward support
-- Seasonal quests
-- Creator-created quests with sponsor dashboards
-- Reputation levels
-- Cross-chain claim
-- Manual appeal queue
-- True Gelato Relay integration once SDK is ESM-stable
+- Paid X API integration → deterministic post content checks
+- Mainnet deployment + multi-chain reward bridging
+- Reputation levels and seasonal quests
+- Sponsor self-publish (skip admin approval for trusted sponsors)
 
 ## Brand System
 
@@ -293,4 +318,4 @@ Typography: Plus Jakarta Sans.
 
 ---
 
-QuestLock v1 · Base Sepolia · Proof over hype.
+QuestLock v1.2 · Base Sepolia · Proof over hype.

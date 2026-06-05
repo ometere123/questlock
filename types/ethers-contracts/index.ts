@@ -3,8 +3,10 @@
 /* eslint-disable */
 export type { QuestBadge } from './QuestBadge.js';
 export type { QuestLockCore } from './QuestLockCore.js';
+export type { QuestLockCoreV2 } from './QuestLockCoreV2.js';
 export type { QuestRewardToken } from './QuestRewardToken.js';
 export * as factories from './factories/index.js';
 export { QuestBadge__factory } from './factories/QuestBadge__factory.js';
 export { QuestLockCore__factory } from './factories/QuestLockCore__factory.js';
 export { QuestRewardToken__factory } from './factories/QuestRewardToken__factory.js';
+export { QuestLockCoreV2__factory } from './factories/QuestLockCoreV2__factory.js';

@@ -77,10 +77,14 @@ class HttpError extends Error {
 }
 
 async function apiGetOnce(path: string): Promise<unknown> {
-  const res = await fetch(`${GITHUB_API}${path}`, {
+  // The `next: { revalidate: 0 }` option is Next.js-specific. Cast through
+  // unknown so tsc with the plain DOM `RequestInit` accepts it (Next strips
+  // the extra field server-side, native fetch ignores it client-side).
+  const init = {
     headers: githubHeaders(),
     next: { revalidate: 0 },
-  });
+  } as unknown as RequestInit;
+  const res = await fetch(`${GITHUB_API}${path}`, init);
   if (!res.ok) throw new HttpError(res.status, `GitHub ${path} -> ${res.status}`);
   return res.json();
 }

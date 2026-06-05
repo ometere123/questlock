@@ -10,6 +10,24 @@
 - Privy account (app ID)
 - GitHub Personal Access Token (for API rate limits)
 - GitHub OAuth App (for v1.1 account linking) — Authorization callback `${NEXT_PUBLIC_APP_URL}/api/auth/github/callback`
+- **v1.2 additions:**
+  - Discord OAuth App (optional, required for `discord_role` proofs) — Authorization callback `${NEXT_PUBLIC_APP_URL}/api/auth/discord/callback`
+  - Discord Bot token (optional, enables deterministic guild-role checks; without it `discord_role` falls back to manual review)
+  - Second contract deploy: QuestLockCoreV2 (`scripts/deploy-v2.ts`) — grant `MINTER_ROLE` on Badge to V2 and `VERIFIER_ROLE` on V2 to the verifier wallet
+  - Vercel Cron entry already in `vercel.json` (`/api/indexer?key=cron` every 15 min) — no manual setup beyond enabling Cron on the Vercel project
+
+### v1.2 env vars
+
+Required:
+- `NEXT_PUBLIC_QUESTLOCK_CORE_V2_ADDRESS` — V2 contract address (`0xDDC0…A282` for the current deploy)
+- `ADMIN_WALLET_ADDRESS` — wallet allowed into `/ops-ql/*` and `/api/admin/*`
+
+Optional (feature-gated):
+- `DISCORD_OAUTH_CLIENT_ID`, `DISCORD_OAUTH_CLIENT_SECRET`, `DISCORD_OAUTH_REDIRECT_URI` — Discord linking
+- `DISCORD_BOT_TOKEN` — enables deterministic Discord role checks
+
+Removed in v1.2:
+- `GELATO_RPC_URL` — Gelato Relay was abandoned in v1.1.1; the env entry is stale and can be deleted.
 
 ## 1. Install dependencies
 

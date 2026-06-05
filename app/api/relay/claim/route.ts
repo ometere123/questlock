@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createPublicClient, createWalletClient, http, parseAbi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
-import { CONTRACT_ADDRESSES } from "@/lib/contracts";
+import { coreAddressFor } from "@/lib/contracts";
 import { log } from "@/lib/logger";
 import { identifyRequest, rateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
@@ -57,7 +57,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (!submission.quest.onchain_quest_id) {
+    // v1.2: pick the right onchain id + contract based on quest.contract_version.
+    const isV2 = submission.quest.contract_version === 2;
+    const onchainQid = isV2
+      ? submission.quest.funded_quest_id
+      : submission.quest.onchain_quest_id;
+    if (!onchainQid) {
       return NextResponse.json({ error: "Quest has no onchain ID." }, { status: 400 });
     }
 
@@ -91,10 +96,10 @@ export async function POST(req: NextRequest) {
     });
 
     const txHash = await walletClient.writeContract({
-      address: CONTRACT_ADDRESSES.QUESTLOCK_CORE,
+      address: coreAddressFor(isV2 ? 2 : 1),
       abi: CLAIM_ABI,
       functionName: "claimRewardFor",
-      args: [submission.quest.onchain_quest_id, walletAddress as `0x${string}`],
+      args: [onchainQid, walletAddress as `0x${string}`],
     });
 
     await publicClient.waitForTransactionReceipt({ hash: txHash });

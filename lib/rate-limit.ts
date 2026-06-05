@@ -98,4 +98,50 @@ export const RATE_LIMITS = {
   appeals: { windowMs: 60_000, max: 2, scope: "appeals" },
   oauthStart: { windowMs: 60_000, max: 5, scope: "oauth-start" },
   oauthCallback: { windowMs: 60_000, max: 10, scope: "oauth-callback" },
+  discordOauthStart: { windowMs: 60_000, max: 5, scope: "discord-oauth-start" },
+  discordOauthCallback: { windowMs: 60_000, max: 10, scope: "discord-oauth-callback" },
+  questRequest: { windowMs: 60_000, max: 3, scope: "quest-request-create" },
+  manualProofSubmit: { windowMs: 60_000, max: 3, scope: "manual-proof-submit" },
+  xProofSubmit: { windowMs: 60_000, max: 3, scope: "x-proof-submit" },
+  lmsProofSubmit: { windowMs: 60_000, max: 3, scope: "lms-proof-submit" },
 } as const;
+
+// ----------------------------------------------------------------- //
+// Durable, Supabase-backed rate limit. Same return shape as the
+// in-process limiter. Falls back to in-process on DB error so a
+// transient DB blip never locks users out.
+// ----------------------------------------------------------------- //
+export async function rateLimitDurable(
+  identifier: string, config: RateLimitConfig
+): Promise<RateLimitResult> {
+  try {
+    // Lazy import so adding the durable path doesn't require Prisma in code
+    // paths that don't need it (tests, edge runtime).
+    const { prisma } = await import("./prisma");
+    const now = new Date();
+    const windowSecs = Math.floor(config.windowMs / 1000);
+    // Window start = floor of current time to windowMs boundary.
+    const windowStartMs = Math.floor(now.getTime() / config.windowMs) * config.windowMs;
+    const windowStart = new Date(windowStartMs);
+    const resetAt = windowStartMs + config.windowMs;
+
+    const key = `${config.scope}:${identifier}`;
+    // Upsert the bucket atomically (composite unique key).
+    const bucket = await prisma.rateLimitBucket.upsert({
+      where: { key_route_window_start: { key, route: config.scope, window_start: windowStart } },
+      update: { count: { increment: 1 } },
+      create: {
+        key, route: config.scope, window_start: windowStart,
+        window_seconds: windowSecs, count: 1, limit: config.max,
+      },
+    });
+
+    if (bucket.count > config.max) {
+      return { allowed: false, remaining: 0, resetAt, retryAfterMs: resetAt - now.getTime() };
+    }
+    return { allowed: true, remaining: config.max - bucket.count, resetAt };
+  } catch {
+    // DB unreachable — fall back to in-process best-effort.
+    return rateLimit(identifier, config);
+  }
+}

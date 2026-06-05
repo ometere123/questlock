@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const { login, logout, authenticated, user } = usePrivy();
@@ -16,7 +17,7 @@ export default function Navbar() {
       style={{ backgroundColor: "var(--ql-bighorn)" }}
       className="sticky top-0 z-50 border-b border-white/10"
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2">
           <svg
             width="28"
@@ -39,7 +40,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto">
           <Link
             href="/quests"
             className="text-sm font-medium transition-colors"
@@ -54,8 +55,22 @@ export default function Navbar() {
           >
             Create
           </Link>
+          <Link
+            href="/leaderboard"
+            className="text-sm font-medium transition-colors"
+            style={{ color: "var(--ql-ashen)" }}
+          >
+            Leaderboard
+          </Link>
           {authenticated && (
             <>
+              <Link
+                href="/sponsor"
+                className="text-sm font-medium"
+                style={{ color: "var(--ql-ashen)" }}
+              >
+                Sponsor
+              </Link>
               <Link
                 href="/me"
                 className="text-sm font-medium"
@@ -93,10 +108,19 @@ export default function Navbar() {
                   >
                     Analytics
                   </Link>
+                  <Link
+                    href="/ops-ql/retry"
+                    className="text-sm font-medium"
+                    style={{ color: "var(--ql-cafe)" }}
+                  >
+                    Retry
+                  </Link>
                 </>
               )}
             </>
           )}
+
+          {authenticated && <NotificationBell />}
 
           {authenticated ? (
             <div className="flex items-center gap-3">

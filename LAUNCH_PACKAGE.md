@@ -1,7 +1,9 @@
 # QuestLock — Launch Package
 
-**Status:** Live on Vercel, `v1.1.2` tag, healthy across all public smoke tests run automatically.
-Build/deploy date: 2026-06-04.
+**Status:** v1.2 release candidate. Live deploy still on `v1.1.2`; v1.2 push pending owner approval.
+Build/deploy date (current production): 2026-06-04 · v1.2 prepared 2026-06-05.
+
+> v1.2 changes: per-quest sponsor-funded pool (QuestLockCoreV2), 5 proof adapters, sponsor dashboard, leaderboard, in-app notifications, scheduled indexer, retry centre. Full notes in `RELEASE_NOTES_v1.2.md`. Known limitations in `KNOWN_LIMITATIONS.md`. Demo walk-through in `DEMO_SCRIPT.md`. Visuals checklist in `SCREENSHOTS_CHECKLIST.md`.
 
 ---
 
@@ -32,7 +34,8 @@ Sponsors can request quests; admins review them, approve offchain, then explicit
 
 | Contract | Address | Explorer |
 |---|---|---|
-| **QuestLockCore** | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` | [BaseScan](https://sepolia.basescan.org/address/0xCCe52216B17096235c070ce85F5C4fFBbf9E782C) |
+| **QuestLockCore** (v1, legacy shared pool) | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` | [BaseScan](https://sepolia.basescan.org/address/0xCCe52216B17096235c070ce85F5C4fFBbf9E782C) |
+| **QuestLockCoreV2** (v1.2, per-quest funded) | `0xDDC0024E76C2bEC64F6f7785e232E7Ce11b0A282` | [BaseScan](https://sepolia.basescan.org/address/0xDDC0024E76C2bEC64F6f7785e232E7Ce11b0A282) |
 | **QuestRewardToken** (QUEST, ERC-20) | `0x154250cc3253b4C7a0f1bfe0eCc26792c81b3054` | [BaseScan](https://sepolia.basescan.org/address/0x154250cc3253b4C7a0f1bfe0eCc26792c81b3054) |
 | **QuestBadge** (ERC-1155, soulbound) | `0x1010F4fB73b2DCb4b2bD43D87E0210cb6a00bBAe` | [BaseScan](https://sepolia.basescan.org/address/0x1010F4fB73b2DCb4b2bD43D87E0210cb6a00bBAe) |
 

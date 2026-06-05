@@ -17,6 +17,11 @@ export default defineConfig({
         enabled: true,
         runs: 200,
       },
+      // v1.2: QuestLockCoreV2 has many fields per quest + several functions
+      // that hit Solidity's stack-too-deep limit without IR. viaIR is the
+      // standard fix and only changes local-compile bytecode — on-chain v1
+      // contracts are unaffected (we never redeploy them).
+      viaIR: true,
     },
   },
   networks: {
