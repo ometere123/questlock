@@ -213,6 +213,7 @@ export default async function QuestDetailPage({
                   questTitle={quest.title}
                   createdBy={quest.created_by}
                   sponsorWallet={quest.sponsor_wallet ?? null}
+                  proofType={quest.proof_type}
                 />
               </div>
             )}

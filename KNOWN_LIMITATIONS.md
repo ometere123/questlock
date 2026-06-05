@@ -11,6 +11,7 @@ Honest list, in priority order. Everything here is a deliberate trade-off, not a
 ## Proof adapters
 
 - **GitHub is the only fully deterministic adapter.** Manual / X / LMS adapters default to admin manual review. Discord is deterministic only when `DISCORD_BOT_TOKEN` is configured AND the bot is a member of the required guild — otherwise it falls back to manual review.
+- **All 5 proof types are fully reachable via the UI** (`/quests/[id]` dispatches by `quest.proof_type`). Builder forms exist for github_project, manual_project, discord_role, x_post, and lms_course; non-github types POST to `/api/proof/multi`.
 - **No paid X API.** The free X tier does not return post content. The `x_post` adapter validates URL format + parses handle/post_id, and then defers content verification (required hashtag/mention/phrase) to admin manual review. URL parsing is deterministic; content authenticity is not.
 - **GitHub adapter trusts GitHub's authorship attribution.** If a user co-authors commits with `Co-Authored-By:` trailers, only the primary author counts toward `commits_after_start`.
 - **Demo URL check** does not execute JavaScript or detect SPA route changes — it only checks that the URL returns a 2xx within the timeout.
