@@ -37,6 +37,10 @@ export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(false);
+  // v1.2.x — pull display name + github link for the header identity fallback chain.
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [githubLogin, setGithubLogin] = useState<string | null>(null);
+  const [githubAvatar, setGithubAvatar] = useState<string | null>(null);
 
   const walletAddress = user?.wallet?.address;
   const shortAddr = walletAddress
@@ -51,7 +55,30 @@ export default function ProfilePage() {
       .then((d) => setSubmissions(Array.isArray(d) ? d : []))
       .catch(() => {})
       .finally(() => setLoading(false));
+    fetch(`/api/users/display-name?wallet=${walletAddress}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setDisplayName(d.display_name ?? null))
+      .catch(() => {});
+    fetch(`/api/auth/github/status?wallet=${walletAddress}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.connected) {
+          setGithubLogin(d.github_login ?? null);
+          setGithubAvatar(d.github_avatar_url ?? null);
+        }
+      })
+      .catch(() => {});
   }, [walletAddress]);
+
+  // Identity fallback chain: display_name → @github_login → short wallet
+  const primaryIdentity =
+    displayName || (githubLogin ? `@${githubLogin}` : shortAddr);
+  // Avatar initial: first 2 chars of the primary identity, uppercased.
+  // Drops the leading "@" / "0x" if present so we get readable letters.
+  const avatarInitial =
+    (displayName?.replace(/^@/, "") ?? githubLogin ?? shortAddr?.slice(2) ?? "")
+      .slice(0, 2)
+      .toUpperCase();
 
   if (!authenticated) {
     return (
@@ -96,12 +123,21 @@ export default function ProfilePage() {
           className="rounded-[18px] p-8 mb-8 flex flex-wrap items-center gap-6"
           style={{ background: "var(--ql-bighorn)" }}
         >
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
-            style={{ background: "#834A1F", color: "#F6F1EA" }}
-          >
-            {shortAddr?.slice(2, 4).toUpperCase()}
-          </div>
+          {githubAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={githubAvatar}
+              alt={githubLogin || "avatar"}
+              className="w-16 h-16 rounded-full"
+            />
+          ) : (
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
+              style={{ background: "#834A1F", color: "#F6F1EA" }}
+            >
+              {avatarInitial}
+            </div>
+          )}
           <div>
             <p
               className="text-xs uppercase tracking-widest mb-1"
@@ -110,11 +146,16 @@ export default function ProfilePage() {
               Builder Profile
             </p>
             <p
-              className="font-mono text-sm"
+              className={`text-lg font-bold ${displayName || githubLogin ? "" : "font-mono"}`}
               style={{ color: "#F6F1EA" }}
             >
-              {shortAddr}
+              {primaryIdentity}
             </p>
+            {(displayName || githubLogin) && (
+              <p className="font-mono text-xs mt-0.5" style={{ color: "var(--ql-cafe)" }}>
+                {shortAddr}
+              </p>
+            )}
             {user?.wallet?.address && (
               <p className="text-xs mt-0.5" style={{ color: "var(--ql-bear)" }}>
                 {user.wallet.address}
