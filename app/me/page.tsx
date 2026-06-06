@@ -41,6 +41,8 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
   const [githubAvatar, setGithubAvatar] = useState<string | null>(null);
+  // v1.2.x — role chips: count of quests this wallet sponsors
+  const [sponsoredCount, setSponsoredCount] = useState<number>(0);
 
   const walletAddress = user?.wallet?.address;
   const shortAddr = walletAddress
@@ -68,7 +70,14 @@ export default function ProfilePage() {
         }
       })
       .catch(() => {});
+    fetch(`/api/sponsor/quests?wallet=${walletAddress}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => setSponsoredCount(Array.isArray(d) ? d.length : 0))
+      .catch(() => {});
   }, [walletAddress]);
+
+  const ADMIN_WALLET = "0x1f63ea74065586af0c7c48428372d88d0a89525b";
+  const isAdmin = walletAddress?.toLowerCase() === ADMIN_WALLET;
 
   // Identity fallback chain: display_name → @github_login → short wallet
   const primaryIdentity =
@@ -143,7 +152,7 @@ export default function ProfilePage() {
               className="text-xs uppercase tracking-widest mb-1"
               style={{ color: "var(--ql-cafe)" }}
             >
-              Builder Profile
+              Profile
             </p>
             <p
               className={`text-lg font-bold ${displayName || githubLogin ? "" : "font-mono"}`}
@@ -160,6 +169,35 @@ export default function ProfilePage() {
               <p className="text-xs mt-0.5" style={{ color: "var(--ql-bear)" }}>
                 {user.wallet.address}
               </p>
+            )}
+            {/* v1.2.x — role chips: only render roles that actually apply */}
+            {(submissions.length > 0 || sponsoredCount > 0 || isAdmin) && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {submissions.length > 0 && (
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(131,74,31,0.25)", color: "#F6F1EA", border: "1px solid rgba(131,74,31,0.6)" }}
+                  >
+                    Builder
+                  </span>
+                )}
+                {sponsoredCount > 0 && (
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(45,90,45,0.25)", color: "#D9EDD9", border: "1px solid rgba(45,90,45,0.6)" }}
+                  >
+                    Sponsor
+                  </span>
+                )}
+                {isAdmin && (
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(122,90,32,0.25)", color: "#FFF1D6", border: "1px solid rgba(122,90,32,0.6)" }}
+                  >
+                    Admin
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <div
