@@ -92,13 +92,13 @@ export default function DisplayNameCard({ walletAddress }: { walletAddress: stri
           maxLength={40}
           placeholder="How should you show up on leaderboards?"
           className="flex-1 min-w-[200px] px-4 py-2 rounded-xl text-sm outline-none"
-          style={{ background: "var(--muted)", border: "1px solid var(--ql-cafe)", color: "var(--ql-bighorn)" }}
+          style={{ background: "var(--muted)", border: "1px solid var(--ql-cafe)", color: "#F0E6E2" }}
         />
         <button
           onClick={save}
           disabled={saving || !dirty}
           className="px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}
+          style={{ background: "#B01020", color: "#F6F1EA" }}
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -107,7 +107,7 @@ export default function DisplayNameCard({ walletAddress }: { walletAddress: stri
             onClick={clearName}
             disabled={saving}
             className="px-3 py-2 rounded-full text-xs font-medium disabled:opacity-50"
-            style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+            style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
           >
             Clear
           </button>
@@ -115,13 +115,13 @@ export default function DisplayNameCard({ walletAddress }: { walletAddress: stri
       </div>
 
       {error && <p className="text-xs mt-2" style={{ color: "#7A2020" }}>{error}</p>}
-      {flash && <p className="text-xs mt-2" style={{ color: "#2D5A2D" }}>{flash}</p>}
+      {flash && <p className="text-xs mt-2" style={{ color: "rgba(122,158,111,0.35)" }}>{flash}</p>}
 
       <p className="text-xs mt-3" style={{ color: "var(--ql-bear)" }}>
         Optional. Shows on leaderboards and your public proof certificate.
         Your wallet stays visible and copyable everywhere.
         {saved
-          ? <> Currently set to <span className="font-semibold" style={{ color: "var(--ql-bighorn)" }}>{saved}</span>.</>
+          ? <> Currently set to <span className="font-semibold" style={{ color: "#F0E6E2" }}>{saved}</span>.</>
           : <> Leave empty to fall back to GitHub login or short wallet.</>}
       </p>
     </div>

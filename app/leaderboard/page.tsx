@@ -59,10 +59,10 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
-        <h1 className="font-sans text-4xl font-bold mb-2" style={{ color: "var(--ql-bighorn)" }}>
+        <h1 className="font-sans text-4xl font-bold mb-2" style={{ color: "#F0E6E2" }}>
           Leaderboard
         </h1>
-        <p className="mb-8" style={{ color: "var(--ql-derby)" }}>
+        <p className="mb-8" style={{ color: "var(--ql-bear)" }}>
           Public, proof-backed. Only completed quests count. No private data exposed.
         </p>
 
@@ -80,8 +80,8 @@ export default function LeaderboardPage() {
                   className="text-xs px-3 py-1.5 rounded-full transition-opacity"
                   style={
                     active
-                      ? { background: "#834A1F", color: "#F6F1EA" }
-                      : { background: "var(--muted)", color: "var(--ql-derby)", border: "1px solid var(--border)" }
+                      ? { background: "#B01020", color: "#F6F1EA" }
+                      : { background: "var(--muted)", color: "var(--ql-bear)", border: "1px solid var(--border)" }
                   }>
                   {f.label}
                 </button>
@@ -94,7 +94,7 @@ export default function LeaderboardPage() {
             </span>
             <select value={badgeId} onChange={(e) => setBadgeId(e.target.value)}
               className="text-xs px-3 py-1.5 rounded-full"
-              style={{ background: "var(--muted)", color: "var(--ql-derby)", border: "1px solid var(--border)" }}>
+              style={{ background: "var(--muted)", color: "var(--ql-bear)", border: "1px solid var(--border)" }}>
               {BADGE_FILTERS.map((b) => (
                 <option key={b.value || "all"} value={b.value}>{b.label}</option>
               ))}
@@ -107,17 +107,17 @@ export default function LeaderboardPage() {
         ) : rows.length === 0 ? (
           <div className="rounded-[18px] p-10 text-center"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <p className="font-sans text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>
+            <p className="font-sans text-lg mb-2" style={{ color: "#F0E6E2" }}>
               No claims {proofType || badgeId ? "in this filter" : "yet"}
             </p>
-            <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>
               {proofType || badgeId
                 ? "Try a different proof type or badge — or remove the filter."
                 : "Be the first verified builder. Pass a quest and your wallet appears here automatically."}
             </p>
             {!proofType && !badgeId && (
               <a href="/quests" className="inline-block px-5 py-2.5 rounded-full text-sm font-semibold"
-                style={{ background: "#834A1F", color: "#F6F1EA" }}>
+                style={{ background: "#B01020", color: "#F6F1EA" }}>
                 Browse open quests →
               </a>
             )}
@@ -142,14 +142,14 @@ export default function LeaderboardPage() {
                     <tr key={i} style={{ borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
                       <td className="px-5 py-3 font-mono" style={{ color: "var(--ql-bear)" }}>{r.rank}</td>
                       <td className="px-5 py-3">
-                        <p className="font-medium" style={{ color: "var(--ql-bighorn)" }}>{primary}</p>
+                        <p className="font-medium" style={{ color: "#F0E6E2" }}>{primary}</p>
                         <p className="text-xs font-mono" style={{ color: "var(--ql-bear)" }}>
                           {r.wallet_short}
                           {r.discord_username && <> · discord: {r.discord_username}</>}
                         </p>
                       </td>
-                      <td className="px-5 py-3 font-mono" style={{ color: "var(--ql-derby)" }}>{r.completed_quests}</td>
-                      <td className="px-5 py-3 font-mono" style={{ color: "var(--ql-derby)" }}>
+                      <td className="px-5 py-3 font-mono" style={{ color: "var(--ql-bear)" }}>{r.completed_quests}</td>
+                      <td className="px-5 py-3 font-mono" style={{ color: "var(--ql-bear)" }}>
                         {r.average_score !== null ? r.average_score : "—"}
                       </td>
                     </tr>

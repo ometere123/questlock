@@ -25,10 +25,10 @@ export default async function QuestsPage() {
     <div className="min-h-screen py-10 sm:py-16 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
-          <h1 className="font-sans text-4xl font-bold mb-3" style={{ color: "var(--ql-bighorn)" }}>
+          <h1 className="font-sans text-4xl font-bold mb-3" style={{ color: "#F0E6E2" }}>
             Open Quests
           </h1>
-          <p style={{ color: "var(--ql-derby)" }}>
+          <p style={{ color: "var(--ql-bear)" }}>
             Submit proof, pass objective checks, claim rewards on Base Sepolia.
           </p>
         </div>
@@ -38,10 +38,10 @@ export default async function QuestsPage() {
             className="text-center py-20 rounded-[18px]"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
-            <p className="font-sans text-xl mb-2" style={{ color: "var(--ql-bighorn)" }}>
+            <p className="font-sans text-xl mb-2" style={{ color: "#F0E6E2" }}>
               No active quests
             </p>
-            <p className="text-sm" style={{ color: "var(--ql-derby)" }}>
+            <p className="text-sm" style={{ color: "var(--ql-bear)" }}>
               Check back soon or create a quest in the admin panel.
             </p>
           </div>

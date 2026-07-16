@@ -22,9 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        {/* Ambient mesh orbs — decorative, fixed behind all content */}
+        <div className="ql-mesh" aria-hidden="true">
+          <div className="ql-orb ql-orb-1" />
+          <div className="ql-orb ql-orb-2" />
+        </div>
         <Providers>
           <Navbar />
-          <main>{children}</main>
+          <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
         </Providers>
       </body>
     </html>

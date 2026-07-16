@@ -97,14 +97,14 @@ export default function ProfilePage() {
       >
         <p
           className="font-serif text-2xl mb-3"
-          style={{ color: "var(--ql-bighorn)" }}
+          style={{ color: "#F0E6E2" }}
         >
           Connect to view your profile
         </p>
         <button
           onClick={login}
           className="px-6 py-3 rounded-full font-medium text-sm"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}
+          style={{ background: "#B01020", color: "#F6F1EA" }}
         >
           Connect Wallet
         </button>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
           ) : (
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}
+              style={{ background: "#B01020", color: "#F6F1EA" }}
             >
               {avatarInitial}
             </div>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
                 {submissions.length > 0 && (
                   <span
                     className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(131,74,31,0.25)", color: "#F6F1EA", border: "1px solid rgba(131,74,31,0.6)" }}
+                    style={{ background: "rgba(176,16,32,0.25)", color: "#F6F1EA", border: "1px solid rgba(176,16,32,0.6)" }}
                   >
                     Builder
                   </span>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
               <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Completed</p>
             </div>
             <div>
-              <p className="text-2xl font-bold font-mono" style={{ color: "#834A1F" }}>
+              <p className="text-2xl font-bold font-mono" style={{ color: "#B01020" }}>
                 {claimable.length}
               </p>
               <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Claimable</p>
@@ -239,17 +239,17 @@ export default function ProfilePage() {
           >
             <p
               className="font-serif text-xl mb-2"
-              style={{ color: "var(--ql-bighorn)" }}
+              style={{ color: "#F0E6E2" }}
             >
               No submissions yet
             </p>
-            <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>
               Submit proof for an open quest to get started.
             </p>
             <Link
               href="/quests"
               className="inline-block px-6 py-2.5 rounded-full text-sm font-medium"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}
+              style={{ background: "#B01020", color: "#F6F1EA" }}
             >
               Browse Quests
             </Link>
@@ -266,7 +266,7 @@ export default function ProfilePage() {
                 <section key={label}>
                   <h2
                     className="font-serif text-lg font-semibold mb-3"
-                    style={{ color: "var(--ql-bighorn)" }}
+                    style={{ color: "#F0E6E2" }}
                   >
                     {label}
                   </h2>
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                           <div>
                             <p
                               className="font-medium"
-                              style={{ color: "var(--ql-bighorn)" }}
+                              style={{ color: "#F0E6E2" }}
                             >
                               {s.quest.title}
                             </p>
@@ -306,7 +306,7 @@ export default function ProfilePage() {
                               href={easAttestationUrl(s.eas_attestation_uid)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: "#834A1F" }}
+                              style={{ color: "#B01020" }}
                             >
                               Attestation →
                             </a>
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                               href={explorerTxUrl(s.tx_hash_claim)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: "#834A1F" }}
+                              style={{ color: "#B01020" }}
                             >
                               Claim tx →
                             </a>
@@ -335,7 +335,7 @@ export default function ProfilePage() {
                             <Link
                               href={`/submit/${s.quest}?submissionId=${s.id}`}
                               className="font-semibold"
-                              style={{ color: "#834A1F" }}
+                              style={{ color: "#B01020" }}
                             >
                               Claim reward →
                             </Link>
@@ -343,7 +343,7 @@ export default function ProfilePage() {
                           {["APPROVED_ONCHAIN", "CLAIMING", "CLAIMED", "ATTESTED"].includes(s.status) && (
                             <Link
                               href={`/proof/${s.id}`}
-                              style={{ color: "#834A1F" }}
+                              style={{ color: "#B01020" }}
                             >
                               Public proof →
                             </Link>

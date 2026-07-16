@@ -94,7 +94,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
   if (quest.contract_version !== 2) {
     return (
       <div className="rounded-[18px] p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-        <p className="text-sm" style={{ color: "var(--ql-derby)" }}>
+        <p className="text-sm" style={{ color: "var(--ql-bear)" }}>
           This is a legacy shared-pool quest. Per-quest funding is only available
           for v1.2 sponsor-funded quests.
         </p>
@@ -181,7 +181,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
 
   return (
     <div className="rounded-[18px] p-6"
-      style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+      style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
           <h2 className="font-sans text-lg font-semibold" style={{ color: "#F6F1EA" }}>
@@ -193,8 +193,8 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
         </div>
         <span className="text-xs font-semibold uppercase px-3 py-1 rounded-full"
           style={
-            quest.funding_status === "FUNDED" ? { background: "#2D5A2D", color: "#F6F1EA" } :
-            quest.funding_status === "UNDERFUNDED" ? { background: "#6B3838", color: "#F0DADA" } :
+            quest.funding_status === "FUNDED" ? { background: "rgba(122,158,111,0.35)", color: "#F6F1EA" } :
+            quest.funding_status === "UNDERFUNDED" ? { background: "rgba(196,80,64,0.3)", color: "#F0DADA" } :
             quest.funding_status === "CLOSED" || quest.funding_status === "REFUNDED" ? { background: "#3a3a3a", color: "var(--ql-cafe)" } :
             { background: "#7A5A20", color: "#FFF1D6" }
           }>
@@ -217,7 +217,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
       </div>
 
       {shortfallWei > 0n && (
-        <div className="rounded-lg px-4 py-3 mb-4 text-xs" style={{ background: "#3F1F1F", color: "#F0DADA" }}>
+        <div className="rounded-lg px-4 py-3 mb-4 text-xs" style={{ background: "rgba(196,80,64,0.1)", color: "#F0DADA" }}>
           Shortfall to reach full funding: <span className="font-mono font-semibold">{fmt(shortfallWei)} QUEST</span>
         </div>
       )}
@@ -245,7 +245,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
         <button onClick={() => setMode("fund")}
           className="px-3 py-1.5 rounded-full text-xs font-semibold"
           style={mode === "fund"
-            ? { background: "#834A1F", color: "#F6F1EA" }
+            ? { background: "#B01020", color: "#F6F1EA" }
             : { background: "rgba(255,255,255,0.06)", color: "var(--ql-cafe)" }}>
           Fund / top up
         </button>
@@ -253,7 +253,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
           <button onClick={() => setMode("withdraw")}
             className="px-3 py-1.5 rounded-full text-xs font-semibold"
             style={mode === "withdraw"
-              ? { background: "#834A1F", color: "#F6F1EA" }
+              ? { background: "#B01020", color: "#F6F1EA" }
               : { background: "rgba(255,255,255,0.06)", color: "var(--ql-cafe)" }}>
             Withdraw unused
           </button>
@@ -265,7 +265,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
       </label>
       <input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)}
         className="w-full mt-1 px-4 py-2.5 rounded-xl text-sm font-mono outline-none"
-        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(169,140,117,0.3)", color: "#F6F1EA" }} />
+        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(180,20,40,0.18)", color: "#F6F1EA" }} />
 
       {isConnected && (
         <p className="text-xs mt-2" style={{ color: "var(--ql-cafe)" }}>
@@ -284,14 +284,14 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
         {mode === "fund" && !needsApprove && (
           <button onClick={fund} disabled={busy || wrongNetwork || !isConnected || amountWei === 0n}
             className="flex-1 py-3 rounded-full font-semibold text-sm disabled:opacity-60"
-            style={{ background: "#834A1F", color: "#F6F1EA" }}>
+            style={{ background: "#B01020", color: "#F6F1EA" }}>
             {step === "funding" || waiting ? "Funding…" : `Fund ${amount} QUEST`}
           </button>
         )}
         {mode === "withdraw" && canWithdraw && (
           <button onClick={withdraw} disabled={busy || wrongNetwork}
             className="flex-1 py-3 rounded-full font-semibold text-sm disabled:opacity-60"
-            style={{ background: "#834A1F", color: "#F6F1EA" }}>
+            style={{ background: "#B01020", color: "#F6F1EA" }}>
             {step === "withdrawing" || waiting ? "Withdrawing…" : `Withdraw ${amount} QUEST`}
           </button>
         )}
@@ -309,7 +309,7 @@ export default function SponsorFundingPanel({ questId }: { questId: string }) {
         <div className="text-xs mt-3" style={{ color: "var(--ql-cafe)" }}>
           {confirmed ? "Confirmed." : "Submitted."}{" "}
           <a href={explorerTxUrl(txHash)} target="_blank" rel="noopener noreferrer"
-            className="underline ml-1" style={{ color: "#834A1F" }}>View tx →</a>
+            className="underline ml-1" style={{ color: "#B01020" }}>View tx →</a>
           {confirmed && <button onClick={() => reset()} className="underline ml-2" style={{ color: "var(--ql-cafe)" }}>dismiss</button>}
         </div>
       )}

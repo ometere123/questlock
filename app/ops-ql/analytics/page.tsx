@@ -92,7 +92,7 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
         <p className="font-sans text-2xl mb-4" style={{ color: "#F6F1EA" }}>Connect wallet</p>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect
         </button>
       </div>
@@ -143,7 +143,7 @@ export default function AnalyticsPage() {
                 <div
                   key={t.label}
                   className="rounded-[18px] p-5"
-                  style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}
+                  style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}
                 >
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                     {t.label}
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                 <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                   Approval conversion
                 </p>
@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
                   approved / submitted
                 </p>
               </div>
-              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                 <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                   Claim conversion
                 </p>
@@ -178,7 +178,7 @@ export default function AnalyticsPage() {
                   claimed / approved
                 </p>
               </div>
-              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+              <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                 <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                   Reward pool (QUEST)
                 </p>
@@ -193,14 +193,14 @@ export default function AnalyticsPage() {
                 const c = data.pool_coverage;
                 const tone =
                   c.status === "fully_covered"
-                    ? { bg: "#2D5A2D", fg: "#F6F1EA", label: "Fully covered" }
+                    ? { bg: "rgba(122,158,111,0.35)", fg: "#F6F1EA", label: "Fully covered" }
                     : c.status === "underfunded_warning"
                     ? { bg: "#7A5A20", fg: "#FFF1D6", label: "Underfunded warning" }
                     : c.status === "needs_topup"
-                    ? { bg: "#6B3838", fg: "#F0DADA", label: "Pool needs top-up" }
+                    ? { bg: "rgba(196,80,64,0.3)", fg: "#F0DADA", label: "Pool needs top-up" }
                     : { bg: "rgba(255,255,255,0.05)", fg: "var(--ql-cafe)", label: "—" };
                 return (
-                  <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                  <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                     <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
                       Pool coverage
                     </p>
@@ -232,7 +232,7 @@ export default function AnalyticsPage() {
             {data.global.top_failure_reasons.length > 0 && (
               <div
                 className="rounded-[18px] overflow-hidden mb-8"
-                style={{ border: "1px solid rgba(169,140,117,0.15)" }}
+                style={{ border: "1px solid rgba(180,20,40,0.12)" }}
               >
                 <div className="px-5 py-3" style={{ background: "var(--ql-night)" }}>
                   <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>
@@ -244,7 +244,7 @@ export default function AnalyticsPage() {
                     {data.global.top_failure_reasons.map((r, i) => (
                       <tr
                         key={i}
-                        style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.08)" : undefined }}
+                        style={{ borderTop: i > 0 ? "1px solid rgba(180,20,40,0.08)" : undefined }}
                       >
                         <td className="px-5 py-2" style={{ color: "var(--ql-ashen)" }}>{r.reason}</td>
                         <td className="px-5 py-2 text-right font-mono" style={{ color: "var(--ql-cafe)" }}>{r.count}</td>
@@ -279,7 +279,7 @@ export default function AnalyticsPage() {
                 <div
                   key={q.id}
                   className="rounded-[18px] p-6"
-                  style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}
+                  style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                     <div>
@@ -293,7 +293,7 @@ export default function AnalyticsPage() {
                     <Link
                       href={`/quests/${q.id}`}
                       className="text-xs"
-                      style={{ color: "#834A1F" }}
+                      style={{ color: "#B01020" }}
                     >
                       View quest →
                     </Link>
@@ -341,7 +341,7 @@ export default function AnalyticsPage() {
                         <div
                           key={i}
                           className="flex items-center justify-between px-3 py-1.5 text-xs"
-                          style={{ borderTop: "1px solid rgba(169,140,117,0.06)" }}
+                          style={{ borderTop: "1px solid rgba(180,20,40,0.06)" }}
                         >
                           <span style={{ color: "var(--ql-ashen)" }}>{r.reason}</span>
                           <span className="font-mono shrink-0 ml-3" style={{ color: "var(--ql-cafe)" }}>{r.count}</span>

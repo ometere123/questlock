@@ -74,8 +74,8 @@ export default function SubmitResultPage() {
   if (!submissionId) {
     return (
       <div className="min-h-screen py-16 px-6 text-center" style={{ background: "var(--background)" }}>
-        <p style={{ color: "var(--ql-derby)" }}>No submission ID found.</p>
-        <Link href="/quests" className="text-sm mt-4 block" style={{ color: "#834A1F" }}>
+        <p style={{ color: "var(--ql-bear)" }}>No submission ID found.</p>
+        <Link href="/quests" className="text-sm mt-4 block" style={{ color: "#B01020" }}>
           ← Browse Quests
         </Link>
       </div>
@@ -90,7 +90,7 @@ export default function SubmitResultPage() {
             className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-4"
             style={{ borderColor: "var(--ql-chocolate)", borderTopColor: "transparent" }}
           />
-          <p style={{ color: "var(--ql-derby)" }}>Loading submission…</p>
+          <p style={{ color: "var(--ql-bear)" }}>Loading submission…</p>
         </div>
       </div>
     );
@@ -103,7 +103,7 @@ export default function SubmitResultPage() {
     <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-serif text-2xl font-bold" style={{ color: "var(--ql-bighorn)" }}>
+          <h1 className="font-serif text-2xl font-bold" style={{ color: "#F0E6E2" }}>
             {data.quest?.title || "Quest Submission"}
           </h1>
           <StatusBadge status={claimed ? "CLAIMED" : data.status} />
@@ -118,7 +118,7 @@ export default function SubmitResultPage() {
             >
               <h2
                 className="font-serif text-base font-semibold mb-5"
-                style={{ color: "var(--ql-bighorn)" }}
+                style={{ color: "#F0E6E2" }}
               >
                 Proof Status
               </h2>
@@ -198,11 +198,11 @@ export default function SubmitResultPage() {
               >
                 <h2
                   className="font-serif text-lg font-semibold mb-1"
-                  style={{ color: "var(--ql-bighorn)" }}
+                  style={{ color: "#F0E6E2" }}
                 >
                   Reward unlocked
                 </h2>
-                <p className="text-sm mb-5" style={{ color: "var(--ql-derby)" }}>
+                <p className="text-sm mb-5" style={{ color: "var(--ql-bear)" }}>
                   Proof passed. Claim your{" "}
                   <strong>{data.quest?.reward_amount} QUEST</strong> tokens and
                   badge gaslessly.
@@ -234,7 +234,7 @@ export default function SubmitResultPage() {
                   <Link
                     href={`/proof/${data.id}`}
                     className="inline-block px-6 py-2.5 rounded-full text-sm font-medium"
-                    style={{ background: "#834A1F", color: "#F6F1EA" }}
+                    style={{ background: "#B01020", color: "#F6F1EA" }}
                   >
                     Share Public Proof →
                   </Link>

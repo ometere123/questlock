@@ -26,11 +26,11 @@ interface ProofSubmissionFormProps {
 const inputStyle = {
   background: "var(--card)",
   border: "1px solid var(--ql-cafe)",
-  color: "var(--ql-bighorn)",
+  color: "#F0E6E2",
 };
 const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-2";
 const labelClass = "block text-sm font-medium mb-1.5";
-const labelStyle = { color: "var(--ql-bighorn)" };
+const labelStyle = { color: "#F0E6E2" };
 const helperClass = "text-xs mt-1";
 const helperStyle = { color: "var(--ql-bear)" };
 const errorClass = "text-xs mt-1";
@@ -43,9 +43,9 @@ function WalletStrip({ address }: { address: string }) {
       style={{ background: "var(--muted)" }}
     >
       <span style={{ color: "var(--ql-bear)" }}>Wallet:</span>
-      <span className="font-mono text-xs" style={{ color: "var(--ql-bighorn)" }}>{address}</span>
+      <span className="font-mono text-xs" style={{ color: "#F0E6E2" }}>{address}</span>
       <span className="ml-auto text-xs px-2 py-0.5 rounded-full"
-        style={{ background: "var(--ql-ashen)", color: "var(--ql-derby)" }}>
+        style={{ background: "var(--ql-ashen)", color: "var(--ql-bear)" }}>
         Base Sepolia
       </span>
     </div>
@@ -61,7 +61,7 @@ function SubmitButton({
       disabled={submitting || blockedBySelf}
       title={blockedBySelf ? "You created or sponsored this quest." : undefined}
       className="w-full py-4 rounded-full font-semibold text-base transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-      style={{ background: "#834A1F", color: "#F6F1EA" }}
+      style={{ background: "#B01020", color: "#F6F1EA" }}
     >
       {blockedBySelf ? "You created or sponsored this quest" : submitting ? busyLabel : label}
     </button>
@@ -154,12 +154,12 @@ function GithubProjectForm({ questId, wallet, createdBy, sponsorWallet }: {
   if (githubStatus && githubStatus.connected === false) {
     return (
       <div className="rounded-[18px] p-8 text-center" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-        <p className="font-serif text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>Connect GitHub before submitting proof</p>
-        <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+        <p className="font-serif text-lg mb-2" style={{ color: "#F0E6E2" }}>Connect GitHub before submitting proof</p>
+        <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>
           QuestLock verifies that the repository owner matches your linked GitHub account.
         </p>
         <Link href="/me" className="inline-block px-6 py-3 rounded-full font-medium text-sm"
-          style={{ background: "#22150C", color: "#F6F1EA" }}>
+          style={{ background: "#1A0A08", color: "#F6F1EA" }}>
           Connect GitHub on Profile →
         </Link>
       </div>
@@ -172,7 +172,7 @@ function GithubProjectForm({ questId, wallet, createdBy, sponsorWallet }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className={labelClass} style={labelStyle}>GitHub Username <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>GitHub Username <span style={{ color: "#B01020" }}>*</span></label>
         <input type="text" value={form.githubUsername} readOnly={Boolean(githubStatus?.connected)}
           onChange={(e) => setForm({ ...form, githubUsername: e.target.value })}
           placeholder="your-github-username" className={inputClass}
@@ -184,7 +184,7 @@ function GithubProjectForm({ questId, wallet, createdBy, sponsorWallet }: {
         {errors.githubUsername && <p className={errorClass} style={errorStyle}>{errors.githubUsername}</p>}
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Repository URL <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Repository URL <span style={{ color: "#B01020" }}>*</span></label>
         <input type="url" value={form.repoUrl} onChange={(e) => setForm({ ...form, repoUrl: e.target.value })}
           placeholder="https://github.com/username/repo-name" className={`${inputClass} font-mono`}
           style={{ ...inputStyle, border: `1px solid ${errors.repoUrl ? "#7A2020" : "var(--ql-cafe)"}` }} />
@@ -255,18 +255,18 @@ function ManualProjectForm({ questId, wallet, createdBy, sponsorWallet }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
         ⓘ This quest is admin-reviewed. You will be notified when a verifier approves or rejects your submission (typically within 72 hours).
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Project Title <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Project Title <span style={{ color: "#B01020" }}>*</span></label>
         <input type="text" value={form.projectTitle} onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
           placeholder="My awesome project" className={inputClass}
           style={{ ...inputStyle, border: `1px solid ${errors.projectTitle ? "#7A2020" : "var(--ql-cafe)"}` }} />
         {errors.projectTitle && <p className={errorClass} style={errorStyle}>{errors.projectTitle}</p>}
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Demo URL <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Demo URL <span style={{ color: "#B01020" }}>*</span></label>
         <input type="url" value={form.demoUrl} onChange={(e) => setForm({ ...form, demoUrl: e.target.value })}
           placeholder="https://your-project.com" className={`${inputClass} font-mono`}
           style={{ ...inputStyle, border: `1px solid ${errors.demoUrl ? "#7A2020" : "var(--ql-cafe)"}` }} />
@@ -274,7 +274,7 @@ function ManualProjectForm({ questId, wallet, createdBy, sponsorWallet }: {
         <p className={helperClass} style={helperStyle}>Live URL the admin can open and verify.</p>
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>What did you build? <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>What did you build? <span style={{ color: "#B01020" }}>*</span></label>
         <textarea value={form.explanation} onChange={(e) => setForm({ ...form, explanation: e.target.value })}
           placeholder="Describe what you built and how it meets the quest requirements (min 30 characters)."
           rows={5} className={`${inputClass} resize-none`}
@@ -330,12 +330,12 @@ function DiscordRoleForm({ questId, wallet, createdBy, sponsorWallet }: {
   if (discordStatus && discordStatus.connected === false) {
     return (
       <div className="rounded-[18px] p-8 text-center" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-        <p className="font-serif text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>Connect Discord before submitting</p>
-        <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
+        <p className="font-serif text-lg mb-2" style={{ color: "#F0E6E2" }}>Connect Discord before submitting</p>
+        <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>
           We need your Discord identity to verify guild membership and role.
         </p>
         <Link href="/me" className="inline-block px-6 py-3 rounded-full font-medium text-sm"
-          style={{ background: "#22150C", color: "#F6F1EA" }}>
+          style={{ background: "#1A0A08", color: "#F6F1EA" }}>
           Connect Discord on Profile →
         </Link>
       </div>
@@ -347,7 +347,7 @@ function DiscordRoleForm({ questId, wallet, createdBy, sponsorWallet }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
         ⓘ Verification uses the linked Discord account{discordStatus?.discord_username && <> (<span className="font-mono">{discordStatus.discord_username}</span>)</>}.
         If the operator has configured a bot token for this guild, verification is automatic; otherwise an admin reviews manually.
       </div>
@@ -406,11 +406,11 @@ function XPostForm({ questId, wallet, createdBy, sponsorWallet }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
         ⓘ URL + author handle are validated automatically. Post content (required hashtag/mention) is verified by an admin (v1.2 free tier — no paid X API).
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Your X handle <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Your X handle <span style={{ color: "#B01020" }}>*</span></label>
         <input type="text" value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })}
           placeholder="@yourhandle" className={inputClass}
           style={{ ...inputStyle, border: `1px solid ${errors.handle ? "#7A2020" : "var(--ql-cafe)"}` }} />
@@ -418,7 +418,7 @@ function XPostForm({ questId, wallet, createdBy, sponsorWallet }: {
         <p className={helperClass} style={helperStyle}>Must match the handle in the post URL.</p>
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Post URL <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Post URL <span style={{ color: "#B01020" }}>*</span></label>
         <input type="url" value={form.postUrl} onChange={(e) => setForm({ ...form, postUrl: e.target.value })}
           placeholder="https://x.com/yourhandle/status/1234567890" className={`${inputClass} font-mono`}
           style={{ ...inputStyle, border: `1px solid ${errors.postUrl ? "#7A2020" : "var(--ql-cafe)"}` }} />
@@ -478,18 +478,18 @@ function LmsCourseForm({ questId, wallet, createdBy, sponsorWallet }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+      <div className="px-4 py-3 rounded-xl text-sm" style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
         ⓘ Course completions are admin-verified. Certificates that hide the learner name are rejected.
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Platform / Course <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Platform / Course <span style={{ color: "#B01020" }}>*</span></label>
         <input type="text" value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })}
           placeholder="e.g. Coursera — Smart Contract Security" className={inputClass}
           style={{ ...inputStyle, border: `1px solid ${errors.platform ? "#7A2020" : "var(--ql-cafe)"}` }} />
         {errors.platform && <p className={errorClass} style={errorStyle}>{errors.platform}</p>}
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>Certificate URL <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>Certificate URL <span style={{ color: "#B01020" }}>*</span></label>
         <input type="url" value={form.certificateUrl} onChange={(e) => setForm({ ...form, certificateUrl: e.target.value })}
           placeholder="https://coursera.org/verify/ABC123" className={`${inputClass} font-mono`}
           style={{ ...inputStyle, border: `1px solid ${errors.certificateUrl ? "#7A2020" : "var(--ql-cafe)"}` }} />
@@ -503,7 +503,7 @@ function LmsCourseForm({ questId, wallet, createdBy, sponsorWallet }: {
           style={inputStyle} />
       </div>
       <div>
-        <label className={labelClass} style={labelStyle}>What did you learn? <span style={{ color: "#834A1F" }}>*</span></label>
+        <label className={labelClass} style={labelStyle}>What did you learn? <span style={{ color: "#B01020" }}>*</span></label>
         <textarea value={form.explanation} onChange={(e) => setForm({ ...form, explanation: e.target.value })}
           placeholder="Summarise the course and what you learnt (min 30 characters)." rows={4}
           className={`${inputClass} resize-none`}
@@ -531,10 +531,10 @@ export default function ProofSubmissionForm({
   if (!authenticated || !wallet) {
     return (
       <div className="rounded-[18px] p-8 text-center" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-        <p className="font-serif text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>Connect your wallet to submit proof</p>
-        <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>You need a connected wallet on Base Sepolia to participate.</p>
+        <p className="font-serif text-lg mb-2" style={{ color: "#F0E6E2" }}>Connect your wallet to submit proof</p>
+        <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>You need a connected wallet on Base Sepolia to participate.</p>
         <button onClick={login} className="px-6 py-3 rounded-full font-medium text-sm"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}>Connect Wallet</button>
+          style={{ background: "#B01020", color: "#F6F1EA" }}>Connect Wallet</button>
       </div>
     );
   }

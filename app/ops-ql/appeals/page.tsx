@@ -39,9 +39,9 @@ interface Appeal {
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
   PENDING: { bg: "#FFF1D6", fg: "#7A5A20" },
   PROCESSING: { bg: "rgba(255,255,255,0.08)", fg: "var(--ql-cafe)" },
-  APPROVED: { bg: "#2D5A2D", fg: "#F6F1EA" },
-  REJECTED: { bg: "#6B3838", fg: "#F0DADA" },
-  APPROVE_FAILED: { bg: "#6B3838", fg: "#F0DADA" },
+  APPROVED: { bg: "rgba(122,158,111,0.35)", fg: "#F6F1EA" },
+  REJECTED: { bg: "rgba(196,80,64,0.3)", fg: "#F0DADA" },
+  APPROVE_FAILED: { bg: "rgba(196,80,64,0.3)", fg: "#F0DADA" },
 };
 
 export default function OpsAppealsPage() {
@@ -89,7 +89,7 @@ export default function OpsAppealsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
         <p className="font-sans text-2xl mb-4" style={{ color: "#F6F1EA" }}>Connect wallet</p>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect
         </button>
       </div>
@@ -116,7 +116,7 @@ export default function OpsAppealsPage() {
         </div>
 
         {error && (
-          <div className="rounded-xl px-4 py-3 mb-6 text-sm" style={{ background: "#3F1F1F", color: "#F0DADA" }}>
+          <div className="rounded-xl px-4 py-3 mb-6 text-sm" style={{ background: "rgba(196,80,64,0.1)", color: "#F0DADA" }}>
             {error}
           </div>
         )}
@@ -135,7 +135,7 @@ export default function OpsAppealsPage() {
                 <div
                   key={a.id}
                   className="rounded-[18px] p-6"
-                  style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}
+                  style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
@@ -183,29 +183,29 @@ export default function OpsAppealsPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-3 text-xs mb-4" style={{ color: "var(--ql-cafe)" }}>
-                    <a href={a.submission.repo_url} target="_blank" rel="noopener noreferrer" style={{ color: "#834A1F" }}>
+                    <a href={a.submission.repo_url} target="_blank" rel="noopener noreferrer" style={{ color: "#B01020" }}>
                       Repo →
                     </a>
                     {a.submission.demo_url && (
-                      <a href={a.submission.demo_url} target="_blank" rel="noopener noreferrer" style={{ color: "#834A1F" }}>
+                      <a href={a.submission.demo_url} target="_blank" rel="noopener noreferrer" style={{ color: "#B01020" }}>
                         Demo →
                       </a>
                     )}
-                    <Link href={`/ops-ql/submissions/${a.submission.id}`} style={{ color: "#834A1F" }}>
+                    <Link href={`/ops-ql/submissions/${a.submission.id}`} style={{ color: "#B01020" }}>
                       Full submission →
                     </Link>
                   </div>
 
                   {a.attestation_uid && (
                     <p className="text-xs mb-2">
-                      <a href={easAttestationUrl(a.attestation_uid)} target="_blank" rel="noopener noreferrer" style={{ color: "#834A1F" }}>
+                      <a href={easAttestationUrl(a.attestation_uid)} target="_blank" rel="noopener noreferrer" style={{ color: "#B01020" }}>
                         Attestation →
                       </a>
                     </p>
                   )}
                   {a.tx_hash_approval && (
                     <p className="text-xs mb-2">
-                      <a href={explorerTxUrl(a.tx_hash_approval)} target="_blank" rel="noopener noreferrer" style={{ color: "#834A1F" }}>
+                      <a href={explorerTxUrl(a.tx_hash_approval)} target="_blank" rel="noopener noreferrer" style={{ color: "#B01020" }}>
                         Approval tx →
                       </a>
                     </p>
@@ -223,7 +223,7 @@ export default function OpsAppealsPage() {
 
                   {/* Actions */}
                   {(a.status === "PENDING" || a.status === "APPROVE_FAILED") && (
-                    <div className="flex flex-wrap gap-3 pt-3" style={{ borderTop: "1px solid rgba(169,140,117,0.1)" }}>
+                    <div className="flex flex-wrap gap-3 pt-3" style={{ borderTop: "1px solid rgba(180,20,40,0.08)" }}>
                       <button
                         onClick={() => {
                           if (confirm("Approve this appeal? This will create an EAS attestation and call submitAndApprove onchain.")) {
@@ -232,7 +232,7 @@ export default function OpsAppealsPage() {
                         }}
                         disabled={busyId === a.id}
                         className="px-4 py-2 rounded-full text-xs font-semibold disabled:opacity-60"
-                        style={{ background: "#834A1F", color: "#F6F1EA" }}
+                        style={{ background: "#B01020", color: "#F6F1EA" }}
                       >
                         {busyId === a.id ? "Processing…" : a.status === "APPROVE_FAILED" ? "Retry approve" : "Approve onchain"}
                       </button>

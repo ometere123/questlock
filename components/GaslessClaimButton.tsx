@@ -49,7 +49,7 @@ export default function GaslessClaimButton({
     return (
       <div
         className="rounded-[18px] p-6 text-center"
-        style={{ background: "#22150C" }}
+        style={{ background: "#1A0A08" }}
       >
         <p
           className="font-semibold text-lg mb-1"
@@ -82,7 +82,7 @@ export default function GaslessClaimButton({
         disabled={state === "submitting"}
         className="w-full py-4 rounded-full font-semibold text-base transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{
-          background: state === "submitting" ? "var(--ql-derby)" : "#834A1F",
+          background: state === "submitting" ? "var(--ql-derby)" : "#B01020",
           color: "#F6F1EA",
         }}
       >

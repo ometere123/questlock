@@ -89,7 +89,7 @@ export default function OpsQuestRequestsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
         <p className="font-sans text-2xl mb-4" style={{ color: "#F6F1EA" }}>Connect wallet</p>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect
         </button>
       </div>
@@ -116,7 +116,7 @@ export default function OpsQuestRequestsPage() {
         </div>
 
         {error && (
-          <div className="rounded-xl px-4 py-3 mb-6 text-sm" style={{ background: "#3F1F1F", color: "#F0DADA" }}>
+          <div className="rounded-xl px-4 py-3 mb-6 text-sm" style={{ background: "rgba(196,80,64,0.1)", color: "#F0DADA" }}>
             {error}
           </div>
         )}
@@ -127,7 +127,7 @@ export default function OpsQuestRequestsPage() {
           <div className="space-y-4">
             {items.map((r) => (
               <div key={r.id} className="rounded-[18px] p-6"
-                style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-lg" style={{ color: "#F6F1EA" }}>{r.title}</p>
@@ -143,9 +143,9 @@ export default function OpsQuestRequestsPage() {
                   </div>
                   <span className="text-xs font-semibold uppercase px-3 py-1 rounded-full"
                     style={
-                      r.status === "PUBLISHED" ? { background: "#2D5A2D", color: "#F6F1EA" } :
-                      r.status === "REJECTED" || r.status === "PUBLISH_FAILED" ? { background: "#6B3838", color: "#F0DADA" } :
-                      r.status === "APPROVED" ? { background: "#834A1F", color: "#F6F1EA" } :
+                      r.status === "PUBLISHED" ? { background: "rgba(122,158,111,0.35)", color: "#F6F1EA" } :
+                      r.status === "REJECTED" || r.status === "PUBLISH_FAILED" ? { background: "rgba(196,80,64,0.3)", color: "#F0DADA" } :
+                      r.status === "APPROVED" ? { background: "#B01020", color: "#F6F1EA" } :
                       r.status === "PUBLISHING" ? { background: "rgba(255,255,255,0.08)", color: "var(--ql-cafe)" } :
                       { background: "#FFF1D6", color: "#7A5A20" }
                     }>
@@ -174,7 +174,7 @@ export default function OpsQuestRequestsPage() {
                 )}
                 {r.publish_tx_hash && (
                   <p className="text-xs mb-3">
-                    <a href={explorerTxUrl(r.publish_tx_hash)} target="_blank" rel="noopener noreferrer" style={{ color: "#834A1F" }}>
+                    <a href={explorerTxUrl(r.publish_tx_hash)} target="_blank" rel="noopener noreferrer" style={{ color: "#B01020" }}>
                       Publish tx →
                     </a>
                     {r.onchain_quest_id && (
@@ -186,14 +186,14 @@ export default function OpsQuestRequestsPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-3 pt-3" style={{ borderTop: "1px solid rgba(169,140,117,0.1)" }}>
+                <div className="flex flex-wrap gap-3 pt-3" style={{ borderTop: "1px solid rgba(180,20,40,0.08)" }}>
                   {r.status === "PENDING_REVIEW" && (
                     <>
                       <button
                         onClick={() => callAction(r.id, "approve")}
                         disabled={busyId === r.id}
                         className="px-4 py-2 rounded-full text-xs font-semibold disabled:opacity-60"
-                        style={{ background: "#834A1F", color: "#F6F1EA" }}
+                        style={{ background: "#B01020", color: "#F6F1EA" }}
                       >
                         Approve
                       </button>
@@ -219,7 +219,7 @@ export default function OpsQuestRequestsPage() {
                       }}
                       disabled={busyId === r.id}
                       className="px-4 py-2 rounded-full text-xs font-semibold disabled:opacity-60"
-                      style={{ background: "#834A1F", color: "#F6F1EA" }}
+                      style={{ background: "#B01020", color: "#F6F1EA" }}
                     >
                       {busyId === r.id ? "Publishing…" : r.status === "PUBLISH_FAILED" ? "Retry publish" : "Publish onchain"}
                     </button>

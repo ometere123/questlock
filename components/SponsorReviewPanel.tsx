@@ -109,7 +109,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
         </p>
         <button onClick={refresh}
           className="text-xs px-3 py-1 rounded-full"
-          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
           Refresh
         </button>
       </div>
@@ -117,7 +117,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
       {toast && (
         <div className="rounded-2xl px-4 py-3 mb-4 text-sm"
           style={toast.kind === "ok"
-            ? { background: "#D9EDD9", color: "#2D5A2D" }
+            ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
             : { background: "#F0DADA", color: "#7A2020" }}>
           {toast.msg}
         </div>
@@ -144,7 +144,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
                     <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-bear)" }}>
                       {PROOF_LABEL[s.proof_type] || s.proof_type}
                     </p>
-                    <p className="font-mono text-xs" style={{ color: "var(--ql-bighorn)" }}>
+                    <p className="font-mono text-xs" style={{ color: "#F0E6E2" }}>
                       {s.wallet_address.slice(0, 10)}…{s.wallet_address.slice(-6)}
                     </p>
                   </div>
@@ -154,7 +154,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
                 </div>
 
                 {/* Evidence — render adapter-aware-but-safe summary */}
-                <div className="text-xs space-y-1 mb-3" style={{ color: "var(--ql-derby)" }}>
+                <div className="text-xs space-y-1 mb-3" style={{ color: "var(--ql-bear)" }}>
                   {Object.entries(ev).map(([k, v]) => {
                     if (v === null || v === undefined || typeof v === "object") return null;
                     const str = String(v);
@@ -164,7 +164,7 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
                         <span className="font-mono opacity-70 shrink-0">{k}:</span>
                         {isUrl ? (
                           <a href={str} target="_blank" rel="noopener noreferrer"
-                            className="break-all" style={{ color: "#834A1F" }}>{str}</a>
+                            className="break-all" style={{ color: "#B01020" }}>{str}</a>
                         ) : (
                           <span className="break-all">{str}</span>
                         )}
@@ -185,20 +185,20 @@ export default function SponsorReviewPanel({ questId }: { questId: string }) {
                     value={rejectReason[s.id] ?? ""}
                     onChange={(e) => setRejectReason({ ...rejectReason, [s.id]: e.target.value })}
                     className="flex-1 min-w-[200px] text-xs px-3 py-1.5 rounded-full"
-                    style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--ql-bighorn)" }}
+                    style={{ background: "var(--card)", border: "1px solid var(--border)", color: "#F0E6E2" }}
                   />
                   <button
                     onClick={() => act(s.id, "reject")}
                     disabled={busy === rejectKey}
                     className="px-3 py-1.5 rounded-full text-xs font-medium disabled:opacity-50"
-                    style={{ background: "#6B3838", color: "#F0DADA" }}>
+                    style={{ background: "rgba(196,80,64,0.3)", color: "#F0DADA" }}>
                     {busy === rejectKey ? "…" : "Reject"}
                   </button>
                   <button
                     onClick={() => act(s.id, "approve")}
                     disabled={busy === approveKey}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold disabled:opacity-50"
-                    style={{ background: "#834A1F", color: "#F6F1EA" }}>
+                    style={{ background: "#B01020", color: "#F6F1EA" }}>
                     {busy === approveKey ? "Approving…" : "Approve"}
                   </button>
                   <Link href={`/proof/${s.id}`} target="_blank"

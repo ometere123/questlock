@@ -47,10 +47,10 @@ const STATUS_LABEL: Record<string, { text: string; tone: "warn" | "ok" | "error"
 };
 
 function statusStyle(tone: string) {
-  if (tone === "ok") return { background: "#D9EDD9", color: "#2D5A2D" };
+  if (tone === "ok") return { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" };
   if (tone === "warn") return { background: "#FFF1D6", color: "#7A5A20" };
   if (tone === "error") return { background: "#F0DADA", color: "#7A2020" };
-  return { background: "var(--muted)", color: "var(--ql-derby)" };
+  return { background: "var(--muted)", color: "var(--ql-bear)" };
 }
 
 export default function CreatePage() {
@@ -154,10 +154,10 @@ export default function CreatePage() {
   const inputStyle = {
     background: "var(--card)",
     border: "1px solid var(--ql-cafe)",
-    color: "var(--ql-bighorn)",
+    color: "#F0E6E2",
   };
   const labelStyle = {
-    color: "var(--ql-bighorn)",
+    color: "#F0E6E2",
     fontSize: "13px",
     fontWeight: 500,
     marginBottom: "6px",
@@ -167,10 +167,10 @@ export default function CreatePage() {
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto">
-        <h1 className="font-sans text-4xl font-bold mb-2" style={{ color: "var(--ql-bighorn)" }}>
+        <h1 className="font-sans text-4xl font-bold mb-2" style={{ color: "#F0E6E2" }}>
           Request a Quest
         </h1>
-        <p className="mb-10" style={{ color: "var(--ql-derby)" }}>
+        <p className="mb-10" style={{ color: "var(--ql-bear)" }}>
           Sponsor a builder quest. QuestLock reviews every request before it goes live on
           Base Sepolia. You stay in control: nothing publishes onchain without admin confirmation.
         </p>
@@ -180,13 +180,13 @@ export default function CreatePage() {
             className="rounded-[18px] p-8 text-center mb-8"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
-            <p className="font-sans text-lg mb-3" style={{ color: "var(--ql-bighorn)" }}>
+            <p className="font-sans text-lg mb-3" style={{ color: "#F0E6E2" }}>
               Connect a wallet to submit a request
             </p>
             <button
               onClick={login}
               className="px-6 py-3 rounded-full font-medium text-sm"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}
+              style={{ background: "#B01020", color: "#F6F1EA" }}
             >
               Connect
             </button>
@@ -205,7 +205,7 @@ export default function CreatePage() {
                   {templates.map((t) => (
                     <button key={t.id} type="button" onClick={() => applyTemplate(t)}
                       className="text-xs px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
-                      style={{ background: "var(--muted)", color: "var(--ql-bighorn)", border: "1px solid var(--border)" }}
+                      style={{ background: "var(--muted)", color: "#F0E6E2", border: "1px solid var(--border)" }}
                       title={t.description}>
                       {t.title}
                     </button>
@@ -360,7 +360,7 @@ export default function CreatePage() {
 
             <div
               className="px-4 py-3 rounded-xl text-xs"
-              style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+              style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
             >
               Signing wallet:{" "}
               <span className="font-mono">{wallet}</span>
@@ -370,7 +370,7 @@ export default function CreatePage() {
               <p className="text-xs" style={{ color: "#7A2020" }}>{result.error}</p>
             )}
             {result?.ok && (
-              <p className="text-xs" style={{ color: "#2D5A2D" }}>
+              <p className="text-xs" style={{ color: "rgba(122,158,111,0.35)" }}>
                 Submitted. The QuestLock team will review your request.
               </p>
             )}
@@ -379,7 +379,7 @@ export default function CreatePage() {
               type="submit"
               disabled={submitting}
               className="w-full py-3.5 rounded-full font-semibold text-sm disabled:opacity-60"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}
+              style={{ background: "#B01020", color: "#F6F1EA" }}
             >
               {submitting ? "Submitting…" : "Submit for review"}
             </button>
@@ -392,7 +392,7 @@ export default function CreatePage() {
             className="rounded-[18px] p-6"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
-            <h2 className="font-sans text-lg font-semibold mb-4" style={{ color: "var(--ql-bighorn)" }}>
+            <h2 className="font-sans text-lg font-semibold mb-4" style={{ color: "#F0E6E2" }}>
               Your requests
             </h2>
             {myRequests.length === 0 ? (
@@ -410,7 +410,7 @@ export default function CreatePage() {
                       style={{ background: "var(--muted)" }}
                     >
                       <div className="min-w-0">
-                        <p className="font-medium truncate" style={{ color: "var(--ql-bighorn)" }}>
+                        <p className="font-medium truncate" style={{ color: "#F0E6E2" }}>
                           {r.title}
                         </p>
                         <p className="text-xs" style={{ color: "var(--ql-bear)" }}>
@@ -433,7 +433,7 @@ export default function CreatePage() {
                           <Link
                             href={`/quests/${r.published_quest_id}`}
                             className="text-xs"
-                            style={{ color: "#834A1F" }}
+                            style={{ color: "#B01020" }}
                           >
                             View quest →
                           </Link>

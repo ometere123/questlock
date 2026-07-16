@@ -103,13 +103,13 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
         className="rounded-[18px] p-6 text-center"
         style={{ background: "#D9EDD9" }}
       >
-        <p className="font-semibold" style={{ color: "#2D5A2D" }}>
+        <p className="font-semibold" style={{ color: "rgba(122,158,111,0.35)" }}>
           Quest created successfully.
         </p>
         <button
           onClick={() => setSuccess(false)}
           className="text-sm mt-2"
-          style={{ color: "#2D5A2D" }}
+          style={{ color: "rgba(122,158,111,0.35)" }}
         >
           Create another
         </button>
@@ -120,7 +120,7 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
   const inputCls = "w-full px-4 py-2.5 rounded-xl text-sm outline-none";
   const inputStyle = {
     background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(169,140,117,0.3)",
+    border: "1px solid rgba(180,20,40,0.18)",
     color: "#F6F1EA",
   };
   const labelStyle = { color: "var(--ql-cafe)", marginBottom: "6px", display: "block", fontSize: "12px" };
@@ -209,7 +209,7 @@ function AdminQuestForm({ onCreated }: { onCreated: () => void }) {
         type="submit"
         disabled={submitting}
         className="w-full py-3 rounded-full font-medium text-sm disabled:opacity-60"
-        style={{ background: "#834A1F", color: "#F6F1EA" }}
+        style={{ background: "#B01020", color: "#F6F1EA" }}
       >
         {submitting ? "Creating…" : "Create Quest"}
       </button>
@@ -247,7 +247,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
         <p className="font-serif text-2xl mb-4" style={{ color: "#F6F1EA" }}>Connect wallet</p>
-        <button onClick={login} className="px-6 py-3 rounded-full font-medium text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full font-medium text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect Wallet
         </button>
       </div>
@@ -286,7 +286,7 @@ export default function AdminPage() {
               className="px-5 py-2 rounded-full text-sm font-medium transition-all"
               style={
                 tab === t.key
-                  ? { background: "#834A1F", color: "#F6F1EA" }
+                  ? { background: "#B01020", color: "#F6F1EA" }
                   : { background: "rgba(255,255,255,0.07)", color: "var(--ql-cafe)" }
               }
             >
@@ -299,7 +299,7 @@ export default function AdminPage() {
         {tab === "create" && (
           <div
             className="rounded-[18px] p-8 max-w-2xl"
-            style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.2)" }}
+            style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.18)" }}
           >
             <h2 className="font-serif text-xl font-semibold mb-6" style={{ color: "#F6F1EA" }}>
               Create Quest
@@ -310,7 +310,7 @@ export default function AdminPage() {
 
         {/* Quests */}
         {tab === "quests" && (
-          <div className="overflow-auto rounded-[18px]" style={{ border: "1px solid rgba(169,140,117,0.2)" }}>
+          <div className="overflow-auto rounded-[18px]" style={{ border: "1px solid rgba(180,20,40,0.18)" }}>
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: "var(--ql-night)" }}>
@@ -329,7 +329,7 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ) : quests.map((q, i) => (
-                  <tr key={q.id} style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.1)" : undefined, background: "rgba(255,255,255,0.02)" }}>
+                  <tr key={q.id} style={{ borderTop: i > 0 ? "1px solid rgba(180,20,40,0.08)" : undefined, background: "rgba(255,255,255,0.02)" }}>
                     <td className="px-5 py-3" style={{ color: "#F6F1EA" }}>
                       <Link href={`/quests/${q.id}`} style={{ color: "#F6F1EA" }}>{q.title}</Link>
                     </td>
@@ -346,7 +346,7 @@ export default function AdminPage() {
 
         {/* Submissions */}
         {tab === "submissions" && (
-          <div className="overflow-auto rounded-[18px]" style={{ border: "1px solid rgba(169,140,117,0.2)" }}>
+          <div className="overflow-auto rounded-[18px]" style={{ border: "1px solid rgba(180,20,40,0.18)" }}>
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: "var(--ql-night)" }}>
@@ -365,7 +365,7 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ) : submissions.map((s, i) => (
-                  <tr key={s.id} style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.1)" : undefined, background: "rgba(255,255,255,0.02)" }}>
+                  <tr key={s.id} style={{ borderTop: i > 0 ? "1px solid rgba(180,20,40,0.08)" : undefined, background: "rgba(255,255,255,0.02)" }}>
                     <td className="px-4 py-3 font-mono text-xs" style={{ color: "var(--ql-ashen)" }}>{s.wallet_address.slice(0, 10)}…</td>
                     <td className="px-4 py-3 text-xs" style={{ color: "var(--ql-ashen)" }}>{s.quest.title}</td>
                     <td className="px-4 py-3 font-mono" style={{ color: "var(--ql-ashen)" }}>{s.score ?? "—"}</td>
@@ -373,7 +373,7 @@ export default function AdminPage() {
                     <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     <td className="px-4 py-3 text-xs" style={{ color: "var(--ql-cafe)" }}>{new Date(s.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/ops-ql/submissions/${s.id}`} className="text-xs underline" style={{ color: "#834A1F" }}>
+                      <Link href={`/ops-ql/submissions/${s.id}`} className="text-xs underline" style={{ color: "#B01020" }}>
                         Inspect
                       </Link>
                     </td>
@@ -392,13 +392,13 @@ export default function AdminPage() {
             ) : (
               <>
                 {/* Env audit */}
-                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>Environment</p>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
                       style={systemStatus.env.ok
-                        ? { background: "#2D5A2D", color: "#F6F1EA" }
-                        : { background: "#6B3838", color: "#F0DADA" }}>
+                        ? { background: "rgba(122,158,111,0.35)", color: "#F6F1EA" }
+                        : { background: "rgba(196,80,64,0.3)", color: "#F0DADA" }}>
                       {systemStatus.env.ok ? "OK" : "MISSING REQUIRED"}
                     </span>
                   </div>
@@ -421,7 +421,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Indexer status */}
-                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                   <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Indexer</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
@@ -448,7 +448,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Submission counts */}
-                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                   <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Submissions by status</p>
                   <div className="flex flex-wrap gap-3">
                     {systemStatus.submissions.by_status.map((s) => (
@@ -461,7 +461,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Recent logs */}
-                <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid rgba(169,140,117,0.15)" }}>
+                <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid rgba(180,20,40,0.12)" }}>
                   <div className="px-5 py-3" style={{ background: "var(--ql-night)" }}>
                     <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>Recent logs</p>
                   </div>
@@ -473,7 +473,7 @@ export default function AdminPage() {
                     <div style={{ background: "rgba(255,255,255,0.02)" }}>
                       {systemStatus.logs.map((l, i) => (
                         <div key={l.id} className="px-5 py-2 flex gap-3 text-xs"
-                          style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.08)" : undefined }}>
+                          style={{ borderTop: i > 0 ? "1px solid rgba(180,20,40,0.08)" : undefined }}>
                           <span className="font-mono shrink-0 uppercase font-semibold w-12"
                             style={{ color: l.level === "error" ? "#F0DADA" : l.level === "warn" ? "#F0C97D" : "var(--ql-cafe)" }}>
                             {l.level}

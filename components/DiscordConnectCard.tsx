@@ -79,7 +79,7 @@ export default function DiscordConnectCard({ walletAddress }: { walletAddress: s
 
   const flashMsg = flash ? MESSAGES[flash] : null;
   const flashStyle =
-    flashMsg?.tone === "ok"   ? { background: "#D9EDD9", color: "#2D5A2D" }
+    flashMsg?.tone === "ok"   ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
     : flashMsg?.tone === "warn" ? { background: "#FFF1D6", color: "#7A5A20" }
     : { background: "#F0DADA", color: "#7A2020" };
 
@@ -104,9 +104,9 @@ export default function DiscordConnectCard({ walletAddress }: { walletAddress: s
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-bear)" }}>Discord Account</p>
             {status?.connected ? (
-              <p className="font-semibold truncate" style={{ color: "var(--ql-bighorn)" }}>{status.discord_username}</p>
+              <p className="font-semibold truncate" style={{ color: "#F0E6E2" }}>{status.discord_username}</p>
             ) : (
-              <p className="font-semibold" style={{ color: "var(--ql-bighorn)" }}>Not connected</p>
+              <p className="font-semibold" style={{ color: "#F0E6E2" }}>Not connected</p>
             )}
             {status?.connected_at && (
               <p className="text-xs mt-0.5" style={{ color: "var(--ql-bear)" }}>
@@ -119,7 +119,7 @@ export default function DiscordConnectCard({ walletAddress }: { walletAddress: s
         {status?.connected ? (
           <button onClick={disconnect} disabled={busy}
             className="px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
-            style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>
+            style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>
             Disconnect
           </button>
         ) : (

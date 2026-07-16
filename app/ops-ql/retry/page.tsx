@@ -98,7 +98,7 @@ export default function RetryCentre() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
         <p className="font-serif text-2xl mb-4" style={{ color: "#F6F1EA" }}>Connect wallet</p>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect Wallet
         </button>
       </div>
@@ -130,8 +130,8 @@ export default function RetryCentre() {
             className="rounded-2xl px-4 py-3 mb-6 text-sm"
             style={
               toast.kind === "ok"
-                ? { background: "#1F3A1F", color: "#D9EDD9", border: "1px solid #2D5A2D" }
-                : { background: "#3F1F1F", color: "#F0DADA", border: "1px solid #6B3838" }
+                ? { background: "rgba(122,158,111,0.1)", color: "#D9EDD9", border: "1px solid #2D5A2D" }
+                : { background: "rgba(196,80,64,0.1)", color: "#F0DADA", border: "1px solid rgba(196,80,64,0.3)" }
             }
           >
             {toast.msg}
@@ -156,7 +156,7 @@ export default function RetryCentre() {
               onClick={() => runRetry("indexer")}
               disabled={busy === "indexer:_"}
               className="px-4 py-2 rounded-full text-xs font-medium disabled:opacity-60"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}
+              style={{ background: "#B01020", color: "#F6F1EA" }}
             >
               {busy === "indexer:_" ? "Indexing…" : "Run indexer now"}
             </button>
@@ -211,7 +211,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div
       className="rounded-[18px] p-5 mb-6"
-      style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}
+      style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}
     >
       <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "var(--ql-cafe)" }}>
         {title}
@@ -256,7 +256,7 @@ function Table({
             const isBusy = busy === key;
             const isDisabled = disabledForType ? disabledForType(r) : false;
             return (
-              <tr key={r.id} style={{ borderTop: "1px solid rgba(169,140,117,0.08)" }}>
+              <tr key={r.id} style={{ borderTop: "1px solid rgba(180,20,40,0.08)" }}>
                 <td className="px-2 py-2" style={{ color: "#F6F1EA" }}>{r.quest.title}</td>
                 <td className="px-2 py-2 font-mono" style={{ color: "var(--ql-ashen)" }}>
                   {r.wallet_address.slice(0, 8)}…{r.wallet_address.slice(-4)}
@@ -269,7 +269,7 @@ function Table({
                     onClick={() => onAction(r)}
                     disabled={isBusy || isDisabled}
                     className="px-3 py-1 rounded-full font-medium disabled:opacity-50"
-                    style={{ background: "#834A1F", color: "#F6F1EA" }}
+                    style={{ background: "#B01020", color: "#F6F1EA" }}
                   >
                     {isBusy ? "Working…" : actionLabel}
                   </button>

@@ -80,11 +80,11 @@ function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<t
           Submitted Work · GitHub Project
         </p>
         <div className="space-y-2 text-sm">
-          <a href={proof.repo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+          <a href={proof.repo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#B01020" }}>
             {proof.repo_url}
           </a>
           {proof.demo_url && (
-            <a href={proof.demo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+            <a href={proof.demo_url} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#B01020" }}>
               {proof.demo_url}
             </a>
           )}
@@ -113,15 +113,15 @@ function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<t
         </p>
         <div className="space-y-2 text-sm">
           {ev.project_title && (
-            <p className="font-semibold" style={{ color: "var(--ql-bighorn)" }}>{String(ev.project_title)}</p>
+            <p className="font-semibold" style={{ color: "#F0E6E2" }}>{String(ev.project_title)}</p>
           )}
           {ev.demo_url && (
-            <a href={String(ev.demo_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+            <a href={String(ev.demo_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#B01020" }}>
               {String(ev.demo_url)}
             </a>
           )}
           {ev.supporting_link && (
-            <a href={String(ev.supporting_link)} target="_blank" rel="noopener noreferrer" className="block break-all text-xs" style={{ color: "#834A1F" }}>
+            <a href={String(ev.supporting_link)} target="_blank" rel="noopener noreferrer" className="block break-all text-xs" style={{ color: "#B01020" }}>
               Supporting: {String(ev.supporting_link)}
             </a>
           )}
@@ -162,7 +162,7 @@ function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<t
         <div className="space-y-2 text-sm">
           {ev.handle && <FactRow k="Handle" v={String(ev.handle)} />}
           {ev.post_url && (
-            <a href={String(ev.post_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+            <a href={String(ev.post_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#B01020" }}>
               {String(ev.post_url)}
             </a>
           )}
@@ -181,7 +181,7 @@ function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<t
         <div className="space-y-2 text-sm">
           {ev.platform && <FactRow k="Platform" v={String(ev.platform)} />}
           {ev.certificate_url && (
-            <a href={String(ev.certificate_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#834A1F" }}>
+            <a href={String(ev.certificate_url)} target="_blank" rel="noopener noreferrer" className="block break-all" style={{ color: "#B01020" }}>
               {String(ev.certificate_url)}
             </a>
           )}
@@ -197,7 +197,7 @@ function SubmittedArtefacts({ proof }: { proof: NonNullable<Awaited<ReturnType<t
       <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-bear)" }}>
         Submitted Work
       </p>
-      <p className="text-sm" style={{ color: "var(--ql-derby)" }}>
+      <p className="text-sm" style={{ color: "var(--ql-bear)" }}>
         Proof type: {PROOF_TYPE_LABELS[proof.proof_type] || proof.proof_type}
       </p>
     </div>
@@ -208,7 +208,7 @@ function FactCell({ k, v }: { k: string; v: string }) {
   return (
     <div>
       <p className="text-[10px] uppercase" style={{ color: "var(--ql-bear)" }}>{k}</p>
-      <p className="text-xs font-mono" style={{ color: "var(--ql-bighorn)" }}>{v}</p>
+      <p className="text-xs font-mono" style={{ color: "#F0E6E2" }}>{v}</p>
     </div>
   );
 }
@@ -217,7 +217,7 @@ function FactRow({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex justify-between gap-3">
       <span style={{ color: "var(--ql-bear)" }}>{k}</span>
-      <span className="font-mono text-xs" style={{ color: "var(--ql-bighorn)" }}>{v}</span>
+      <span className="font-mono text-xs" style={{ color: "#F0E6E2" }}>{v}</span>
     </div>
   );
 }
@@ -271,8 +271,8 @@ export default async function PublicProofPage({
             className="text-xs uppercase tracking-widest font-semibold px-3 py-1 rounded-full"
             style={
               proof.status === "CLAIMED"
-                ? { background: "#22150C", color: "#F6F1EA" }
-                : { background: "#834A1F", color: "#F6F1EA" }
+                ? { background: "#1A0A08", color: "#F6F1EA" }
+                : { background: "#B01020", color: "#F6F1EA" }
             }
           >
             {proof.status === "CLAIMED" ? "Reward Claimed" : "Reward Unlocked"}
@@ -295,7 +295,7 @@ export default async function PublicProofPage({
             style={{ color: "#F6F1EA" }}
           >
             {subjectLabel} passed{" "}
-            <span style={{ color: "#834A1F" }}>{proof.quest.title}</span>
+            <span style={{ color: "#B01020" }}>{proof.quest.title}</span>
           </h1>
           <div className="flex flex-wrap items-center gap-4 mb-6">
             {proof.github_avatar_url && (
@@ -374,13 +374,13 @@ export default async function PublicProofPage({
             {proof.eas_attestation_uid &&
               proof.eas_attestation_uid !== "0x" + "0".repeat(64) && (
                 <div className="flex justify-between gap-3">
-                  <span style={{ color: "var(--ql-derby)" }}>EAS attestation</span>
+                  <span style={{ color: "var(--ql-bear)" }}>EAS attestation</span>
                   <a
                     href={easAttestationUrl(proof.eas_attestation_uid)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-mono text-xs truncate ml-2"
-                    style={{ color: "#834A1F" }}
+                    style={{ color: "#B01020" }}
                   >
                     {proof.eas_attestation_uid.slice(0, 12)}…{proof.eas_attestation_uid.slice(-6)} →
                   </a>
@@ -388,13 +388,13 @@ export default async function PublicProofPage({
               )}
             {proof.tx_hash_approval && (
               <div className="flex justify-between gap-3">
-                <span style={{ color: "var(--ql-derby)" }}>Approval transaction</span>
+                <span style={{ color: "var(--ql-bear)" }}>Approval transaction</span>
                 <a
                   href={explorerTxUrl(proof.tx_hash_approval)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-xs"
-                  style={{ color: "#834A1F" }}
+                  style={{ color: "#B01020" }}
                 >
                   {proof.tx_hash_approval.slice(0, 12)}…{proof.tx_hash_approval.slice(-6)} →
                 </a>
@@ -402,13 +402,13 @@ export default async function PublicProofPage({
             )}
             {proof.tx_hash_claim && (
               <div className="flex justify-between gap-3">
-                <span style={{ color: "var(--ql-derby)" }}>Claim transaction</span>
+                <span style={{ color: "var(--ql-bear)" }}>Claim transaction</span>
                 <a
                   href={explorerTxUrl(proof.tx_hash_claim)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-xs"
-                  style={{ color: "#834A1F" }}
+                  style={{ color: "#B01020" }}
                 >
                   {proof.tx_hash_claim.slice(0, 12)}…{proof.tx_hash_claim.slice(-6)} →
                 </a>
@@ -417,7 +417,7 @@ export default async function PublicProofPage({
             {proof.proof_hash && (
               <div className="flex justify-between gap-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
                 <span style={{ color: "var(--ql-bear)" }}>Proof hash</span>
-                <span className="font-mono text-xs" style={{ color: "var(--ql-derby)" }}>
+                <span className="font-mono text-xs" style={{ color: "var(--ql-bear)" }}>
                   {proof.proof_hash.slice(0, 12)}…{proof.proof_hash.slice(-6)}
                 </span>
               </div>
@@ -433,7 +433,7 @@ export default async function PublicProofPage({
           <span className="uppercase tracking-widest" style={{ color: "var(--ql-bear)" }}>Proof type</span>
           <span
             className="px-2 py-0.5 rounded-full font-semibold"
-            style={{ background: "#22150C", color: "#F6F1EA" }}
+            style={{ background: "#1A0A08", color: "#F6F1EA" }}
           >
             {PROOF_TYPE_LABELS[proof.proof_type] || proof.proof_type}
           </span>
@@ -445,7 +445,7 @@ export default async function PublicProofPage({
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}
         >
           <div className="px-6 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
-            <p className="font-sans text-base font-semibold" style={{ color: "var(--ql-bighorn)" }}>
+            <p className="font-sans text-base font-semibold" style={{ color: "#F0E6E2" }}>
               Proof Checks
             </p>
             <p className="text-xs mt-1" style={{ color: "var(--ql-bear)" }}>
@@ -465,7 +465,7 @@ export default async function PublicProofPage({
                     borderTop: i > 0 ? "1px solid var(--border)" : undefined,
                   }}
                 >
-                  <td className="px-6 py-3" style={{ color: "var(--ql-bighorn)" }}>
+                  <td className="px-6 py-3" style={{ color: "#F0E6E2" }}>
                     {CHECK_LABELS[c.check_name] || c.check_name}
                   </td>
                   <td className="px-4 py-3 text-center w-16">
@@ -473,7 +473,7 @@ export default async function PublicProofPage({
                       className="inline-block w-5 h-5 rounded-full text-xs font-bold leading-5 text-center"
                       style={
                         c.passed
-                          ? { background: "#D9EDD9", color: "#2D5A2D" }
+                          ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
                           : { background: "#F0DADA", color: "#7A2020" }
                       }
                     >
@@ -482,7 +482,7 @@ export default async function PublicProofPage({
                   </td>
                   <td
                     className="px-6 py-3 text-right font-mono text-xs"
-                    style={{ color: c.passed ? "#2D5A2D" : "#7A2020" }}
+                    style={{ color: c.passed ? "rgba(122,158,111,0.35)" : "#7A2020" }}
                   >
                     {c.points_awarded}/{c.max_points}
                   </td>

@@ -91,7 +91,7 @@ export default function GithubConnectCard({
   const flashMsg = flash ? MESSAGES[flash] : null;
   const flashStyle =
     flashMsg?.tone === "ok"
-      ? { background: "#D9EDD9", color: "#2D5A2D" }
+      ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
       : flashMsg?.tone === "warn"
       ? { background: "#FFF1D6", color: "#7A5A20" }
       : { background: "#F0DADA", color: "#7A2020" };
@@ -136,12 +136,12 @@ export default function GithubConnectCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold truncate block"
-                style={{ color: "var(--ql-bighorn)" }}
+                style={{ color: "#F0E6E2" }}
               >
                 @{status.github_login}
               </a>
             ) : (
-              <p className="font-semibold" style={{ color: "var(--ql-bighorn)" }}>
+              <p className="font-semibold" style={{ color: "#F0E6E2" }}>
                 Not connected
               </p>
             )}
@@ -158,7 +158,7 @@ export default function GithubConnectCard({
             onClick={disconnect}
             disabled={busy}
             className="px-4 py-2 rounded-full text-sm font-medium disabled:opacity-60"
-            style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+            style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
           >
             Disconnect
           </button>
@@ -167,7 +167,7 @@ export default function GithubConnectCard({
             onClick={connect}
             disabled={busy}
             className="px-5 py-2 rounded-full text-sm font-semibold disabled:opacity-60"
-            style={{ background: "#22150C", color: "#F6F1EA" }}
+            style={{ background: "#1A0A08", color: "#F6F1EA" }}
           >
             {busy ? "Opening GitHub…" : "Connect GitHub"}
           </button>

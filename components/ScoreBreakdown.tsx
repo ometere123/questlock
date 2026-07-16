@@ -42,14 +42,14 @@ export default function ScoreBreakdown({
       >
         <span
           className="font-serif text-base font-semibold"
-          style={{ color: "var(--ql-bighorn)" }}
+          style={{ color: "#F0E6E2" }}
         >
           Score Breakdown
         </span>
         <div className="flex items-center gap-3">
           <span
             className="text-2xl font-bold tabular-nums"
-            style={{ color: passed ? "#2D5A2D" : "#7A2020" }}
+            style={{ color: passed ? "rgba(122,158,111,0.35)" : "#7A2020" }}
           >
             {totalScore}
           </span>
@@ -58,7 +58,7 @@ export default function ScoreBreakdown({
             className="text-xs font-semibold uppercase px-2 py-0.5 rounded-full"
             style={
               passed
-                ? { background: "#D9EDD9", color: "#2D5A2D" }
+                ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
                 : { background: "#F0DADA", color: "#7A2020" }
             }
           >
@@ -99,7 +99,7 @@ export default function ScoreBreakdown({
               }}
             >
               <td className="px-6 py-3">
-                <p style={{ color: "var(--ql-bighorn)" }}>
+                <p style={{ color: "#F0E6E2" }}>
                   {CHECK_LABELS[c.check_name] || c.check_name}
                 </p>
                 {!c.passed && c.details_json?.details && (
@@ -116,7 +116,7 @@ export default function ScoreBreakdown({
                   className="inline-block w-5 h-5 rounded-full text-xs font-bold leading-5 text-center"
                   style={
                     c.passed
-                      ? { background: "#D9EDD9", color: "#2D5A2D" }
+                      ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
                       : { background: "#F0DADA", color: "#7A2020" }
                   }
                 >
@@ -125,7 +125,7 @@ export default function ScoreBreakdown({
               </td>
               <td
                 className="px-6 py-3 text-right font-mono font-medium"
-                style={{ color: c.passed ? "#2D5A2D" : "#7A2020" }}
+                style={{ color: c.passed ? "rgba(122,158,111,0.35)" : "#7A2020" }}
               >
                 {c.points_awarded}/{c.max_points}
               </td>

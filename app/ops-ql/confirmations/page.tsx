@@ -48,9 +48,9 @@ function TrustChip({ trust }: { trust: SponsorTrust | null }) {
   if (!trust) return null;
   const map: Record<string, { bg: string; fg: string }> = {
     new:       { bg: "#FFF1D6", fg: "#7A5A20" },
-    trusted:   { bg: "#D9EDD9", fg: "#2D5A2D" },
+    trusted:   { bg: "#D9EDD9", fg: "rgba(122,158,111,0.35)" },
     flagged:   { bg: "#F0DADA", fg: "#7A2020" },
-    suspended: { bg: "#6B3838", fg: "#F0DADA" },
+    suspended: { bg: "rgba(196,80,64,0.3)", fg: "#F0DADA" },
   };
   const s = map[trust.level] || map.new;
   return (
@@ -144,7 +144,7 @@ export default function ConfirmationsPage() {
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect Wallet
         </button>
       </div>
@@ -172,8 +172,8 @@ export default function ConfirmationsPage() {
         {toast && (
           <div className="rounded-2xl px-4 py-3 mb-6 text-sm"
             style={toast.kind === "ok"
-              ? { background: "#1F3A1F", color: "#D9EDD9", border: "1px solid #2D5A2D" }
-              : { background: "#3F1F1F", color: "#F0DADA", border: "1px solid #6B3838" }}>
+              ? { background: "rgba(122,158,111,0.1)", color: "#D9EDD9", border: "1px solid #2D5A2D" }
+              : { background: "rgba(196,80,64,0.1)", color: "#F0DADA", border: "1px solid rgba(196,80,64,0.3)" }}>
             {toast.msg}
           </div>
         )}
@@ -182,7 +182,7 @@ export default function ConfirmationsPage() {
           <p className="text-xs" style={{ color: "var(--ql-bear)" }}>Loading…</p>
         ) : items.length === 0 ? (
           <div className="rounded-[18px] p-10 text-center"
-            style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+            style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
             <p style={{ color: "#F6F1EA" }}>Nothing waiting for admin confirmation.</p>
             <p className="text-xs mt-2" style={{ color: "var(--ql-bear)" }}>
               When a new sponsor approves a submission, or when a trusted sponsor approves a high-value quest, it lands here for your sign-off.
@@ -195,7 +195,7 @@ export default function ConfirmationsPage() {
               const sponsor = s.quest.sponsor_wallet;
               return (
                 <li key={s.id} className="rounded-[18px] p-5"
-                  style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+                  style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
                   <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
                       <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--ql-cafe)" }}>
@@ -234,7 +234,7 @@ export default function ConfirmationsPage() {
                       );
                     })}
                     {s.explanation && (
-                      <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(169,140,117,0.15)" }}>
+                      <div className="mt-2 pt-2" style={{ borderTop: "1px solid rgba(180,20,40,0.12)" }}>
                         <p className="opacity-70 mb-0.5">Builder explanation (private):</p>
                         <p>{s.explanation}</p>
                       </div>
@@ -247,23 +247,23 @@ export default function ConfirmationsPage() {
                       value={rejectReason[s.id] ?? ""}
                       onChange={(e) => setRejectReason({ ...rejectReason, [s.id]: e.target.value })}
                       className="flex-1 min-w-[200px] text-xs px-3 py-1.5 rounded-full"
-                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(169,140,117,0.3)", color: "#F6F1EA" }}
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(180,20,40,0.18)", color: "#F6F1EA" }}
                     />
                     <button onClick={() => act(s.id, "reject")} disabled={busy === `reject:${s.id}`}
                       className="px-3 py-1.5 rounded-full text-xs font-medium disabled:opacity-50"
-                      style={{ background: "#6B3838", color: "#F0DADA" }}>
+                      style={{ background: "rgba(196,80,64,0.3)", color: "#F0DADA" }}>
                       {busy === `reject:${s.id}` ? "…" : "Override → Reject"}
                     </button>
                     <button onClick={() => act(s.id, "confirm")} disabled={busy === `confirm:${s.id}`}
                       className="px-3 py-1.5 rounded-full text-xs font-semibold disabled:opacity-50"
-                      style={{ background: "#834A1F", color: "#F6F1EA" }}>
+                      style={{ background: "#B01020", color: "#F6F1EA" }}>
                       {busy === `confirm:${s.id}` ? "Confirming…" : "Confirm → Fire onchain"}
                     </button>
                   </div>
 
                   {sponsor && (
                     <div className="flex items-center gap-2 mt-3 pt-3 flex-wrap"
-                      style={{ borderTop: "1px solid rgba(169,140,117,0.15)" }}>
+                      style={{ borderTop: "1px solid rgba(180,20,40,0.12)" }}>
                       <span className="text-[10px] uppercase" style={{ color: "var(--ql-bear)" }}>Sponsor actions:</span>
                       {(["trusted", "flagged", "suspended", "new"] as const).map((lvl) => (
                         <button key={lvl} onClick={() => setTrust(sponsor, lvl)}

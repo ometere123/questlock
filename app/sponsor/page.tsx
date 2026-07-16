@@ -19,10 +19,10 @@ interface SponsorQuest {
 }
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
-  FUNDED: { bg: "#2D5A2D", fg: "#F6F1EA" },
+  FUNDED: { bg: "rgba(122,158,111,0.35)", fg: "#F6F1EA" },
   PARTIALLY_FUNDED: { bg: "#7A5A20", fg: "#FFF1D6" },
   UNFUNDED: { bg: "#7A5A20", fg: "#FFF1D6" },
-  UNDERFUNDED: { bg: "#6B3838", fg: "#F0DADA" },
+  UNDERFUNDED: { bg: "rgba(196,80,64,0.3)", fg: "#F0DADA" },
   CLOSED: { bg: "#3a3a3a", fg: "var(--ql-cafe)" },
   REFUNDED: { bg: "#3a3a3a", fg: "var(--ql-cafe)" },
   LEGACY_SHARED: { bg: "rgba(255,255,255,0.06)", fg: "var(--ql-cafe)" },
@@ -62,11 +62,11 @@ export default function SponsorHome() {
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--background)" }}>
-        <p className="font-sans text-2xl mb-3" style={{ color: "var(--ql-bighorn)" }}>
+        <p className="font-sans text-2xl mb-3" style={{ color: "#F0E6E2" }}>
           Connect to view your sponsored quests
         </p>
         <button onClick={login} className="px-6 py-3 rounded-full font-medium text-sm"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}>Connect Wallet</button>
+          style={{ background: "#B01020", color: "#F6F1EA" }}>Connect Wallet</button>
       </div>
     );
   }
@@ -76,15 +76,15 @@ export default function SponsorHome() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-sans text-3xl font-bold" style={{ color: "var(--ql-bighorn)" }}>
+            <h1 className="font-sans text-3xl font-bold" style={{ color: "#F0E6E2" }}>
               Sponsor Dashboard
             </h1>
-            <p className="text-sm mt-1" style={{ color: "var(--ql-derby)" }}>
+            <p className="text-sm mt-1" style={{ color: "var(--ql-bear)" }}>
               Quests where you are recorded as sponsor.
             </p>
           </div>
           <Link href="/create" className="px-5 py-2.5 rounded-full text-sm font-semibold"
-            style={{ background: "#834A1F", color: "#F6F1EA" }}>+ Request quest</Link>
+            style={{ background: "#B01020", color: "#F6F1EA" }}>+ Request quest</Link>
         </div>
 
         {/* v1.2.1 — Sponsor trust banner */}
@@ -92,11 +92,11 @@ export default function SponsorHome() {
           <div className="rounded-[18px] px-5 py-4 mb-6 flex items-center justify-between gap-3 flex-wrap"
             style={
               trust.level === "trusted"
-                ? { background: "#D9EDD9", color: "#2D5A2D", border: "1px solid #2D5A2D" }
+                ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)", border: "1px solid #2D5A2D" }
                 : trust.level === "flagged"
-                ? { background: "#F0DADA", color: "#7A2020", border: "1px solid #6B3838" }
+                ? { background: "#F0DADA", color: "#7A2020", border: "1px solid rgba(196,80,64,0.3)" }
                 : trust.level === "suspended"
-                ? { background: "#6B3838", color: "#F0DADA", border: "1px solid #6B3838" }
+                ? { background: "rgba(196,80,64,0.3)", color: "#F0DADA", border: "1px solid rgba(196,80,64,0.3)" }
                 : { background: "#FFF1D6", color: "#7A5A20", border: "1px solid #7A5A20" }
             }>
             <div>
@@ -136,20 +136,20 @@ export default function SponsorHome() {
           </div>
         ) : error ? (
           <div className="rounded-[18px] p-6 text-center"
-            style={{ background: "#3F1F1F", border: "1px solid #6B3838", color: "#F0DADA" }}>
+            style={{ background: "rgba(196,80,64,0.1)", border: "1px solid rgba(196,80,64,0.3)", color: "#F0DADA" }}>
             <p className="text-sm mb-3">Couldn&apos;t load your sponsored quests.</p>
             <p className="text-xs mb-4 opacity-80">{error}</p>
             <button onClick={() => location.reload()} className="px-4 py-2 rounded-full text-xs font-medium"
-              style={{ background: "#834A1F", color: "#F6F1EA" }}>Retry</button>
+              style={{ background: "#B01020", color: "#F6F1EA" }}>Retry</button>
           </div>
         ) : quests.length === 0 ? (
           <div className="rounded-[18px] p-10 text-center"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <p className="font-sans text-lg mb-2" style={{ color: "var(--ql-bighorn)" }}>
+            <p className="font-sans text-lg mb-2" style={{ color: "#F0E6E2" }}>
               No sponsored quests yet
             </p>
-            <p className="text-sm mb-4" style={{ color: "var(--ql-derby)" }}>
-              Request a quest at <Link href="/create" className="underline" style={{ color: "#834A1F" }}>/create</Link> —
+            <p className="text-sm mb-4" style={{ color: "var(--ql-bear)" }}>
+              Request a quest at <Link href="/create" className="underline" style={{ color: "#B01020" }}>/create</Link> —
               once an admin approves and publishes it, it will appear here.
             </p>
           </div>
@@ -162,11 +162,11 @@ export default function SponsorHome() {
                   className="block rounded-[18px] p-6 transition-opacity hover:opacity-90"
                   style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
                   <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-                    <p className="font-semibold text-lg" style={{ color: "var(--ql-bighorn)" }}>{q.title}</p>
+                    <p className="font-semibold text-lg" style={{ color: "#F0E6E2" }}>{q.title}</p>
                     <div className="flex items-center gap-2">
                       {q.contract_version === 2 && (
                         <span className="text-[10px] px-2 py-0.5 rounded-full"
-                          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}>v1.2 funded</span>
+                          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}>v1.2 funded</span>
                       )}
                       <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
                         style={{ background: tone.bg, color: tone.fg }}>

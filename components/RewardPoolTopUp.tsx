@@ -148,7 +148,7 @@ export default function RewardPoolTopUp({
       className="rounded-[18px] p-6 mb-8"
       style={{
         background: "var(--ql-night)",
-        border: "1px solid rgba(169,140,117,0.15)",
+        border: "1px solid rgba(180,20,40,0.12)",
       }}
     >
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -213,7 +213,7 @@ export default function RewardPoolTopUp({
       {isWrongWallet && (
         <div
           className="rounded-lg px-4 py-3 mb-4 text-xs"
-          style={{ background: "#6B3838", color: "#F0DADA" }}
+          style={{ background: "rgba(196,80,64,0.3)", color: "#F0DADA" }}
         >
           Connected wallet {address?.slice(0, 8)}…{address?.slice(-4)} is not
           the admin wallet. Connect{" "}
@@ -248,7 +248,7 @@ export default function RewardPoolTopUp({
           className="w-full mt-1 px-4 py-2.5 rounded-xl text-sm font-mono outline-none"
           style={{
             background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(169,140,117,0.3)",
+            border: "1px solid rgba(180,20,40,0.18)",
             color: "#F6F1EA",
           }}
         />
@@ -276,7 +276,7 @@ export default function RewardPoolTopUp({
         onClick={handleTransfer}
         disabled={!decision.canSubmit}
         className="w-full py-3 rounded-full font-semibold text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ background: "#834A1F", color: "#F6F1EA" }}
+        style={{ background: "#B01020", color: "#F6F1EA" }}
       >
         {submitting
           ? "Awaiting wallet…"
@@ -305,7 +305,7 @@ export default function RewardPoolTopUp({
             target="_blank"
             rel="noopener noreferrer"
             className="ml-2 underline"
-            style={{ color: "#834A1F" }}
+            style={{ color: "#B01020" }}
           >
             View tx →
           </a>

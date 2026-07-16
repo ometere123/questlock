@@ -103,7 +103,7 @@ export default function NotificationBell() {
         {data.unread > 0 && (
           <span
             className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1"
-            style={{ background: "#834A1F", color: "#F6F1EA", border: "2px solid var(--ql-bighorn)" }}
+            style={{ background: "#B01020", color: "#F6F1EA", border: "2px solid var(--ql-bighorn)" }}
           >
             {data.unread > 99 ? "99+" : data.unread}
           </span>
@@ -115,12 +115,12 @@ export default function NotificationBell() {
           className="absolute right-0 mt-2 w-80 max-h-[28rem] overflow-y-auto rounded-2xl shadow-2xl z-50"
           style={{
             background: "var(--ql-night)",
-            border: "1px solid rgba(169,140,117,0.25)",
+            border: "1px solid rgba(180,20,40,0.15)",
           }}
         >
           <div
             className="px-4 py-3 flex items-center justify-between sticky top-0"
-            style={{ background: "var(--ql-night)", borderBottom: "1px solid rgba(169,140,117,0.15)" }}
+            style={{ background: "var(--ql-night)", borderBottom: "1px solid rgba(180,20,40,0.12)" }}
           >
             <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--ql-cafe)" }}>
               Notifications
@@ -151,14 +151,14 @@ export default function NotificationBell() {
                   key={n.id}
                   className="px-4 py-3 flex gap-3 cursor-pointer hover:opacity-90"
                   style={{
-                    borderTop: "1px solid rgba(169,140,117,0.08)",
-                    background: n.read_at ? "transparent" : "rgba(131,74,31,0.08)",
+                    borderTop: "1px solid rgba(180,20,40,0.08)",
+                    background: n.read_at ? "transparent" : "rgba(176,16,32,0.08)",
                   }}
                   onClick={() => !n.read_at && markRead(n.id)}
                 >
                   <span
                     className="w-2 h-2 mt-1.5 rounded-full shrink-0"
-                    style={{ background: n.read_at ? "transparent" : "#834A1F" }}
+                    style={{ background: n.read_at ? "transparent" : "#B01020" }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate" style={{ color: "#F6F1EA" }}>

@@ -89,7 +89,7 @@ export default function AdminSubmissionDetail() {
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "var(--ql-bighorn)" }}>
-        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#834A1F", color: "#F6F1EA" }}>
+        <button onClick={login} className="px-6 py-3 rounded-full text-sm" style={{ background: "#B01020", color: "#F6F1EA" }}>
           Connect Wallet
         </button>
       </div>
@@ -141,7 +141,7 @@ export default function AdminSubmissionDetail() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* Submitter */}
-          <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+          <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
             <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Submitter</p>
             <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Wallet</p>
             <a href={explorerAddressUrl(data.wallet_address)} target="_blank" rel="noopener noreferrer" className="font-mono text-xs block mb-3" style={{ color: "#F6F1EA" }}>
@@ -150,13 +150,13 @@ export default function AdminSubmissionDetail() {
             <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>GitHub</p>
             <p className="text-sm mb-3" style={{ color: "#F6F1EA" }}>@{data.github_username}</p>
             <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Repository</p>
-            <a href={data.repo_url} target="_blank" rel="noopener noreferrer" className="text-sm block mb-3 break-all" style={{ color: "#834A1F" }}>
+            <a href={data.repo_url} target="_blank" rel="noopener noreferrer" className="text-sm block mb-3 break-all" style={{ color: "#B01020" }}>
               {data.repo_url}
             </a>
             {data.demo_url && (
               <>
                 <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Demo URL</p>
-                <a href={data.demo_url} target="_blank" rel="noopener noreferrer" className="text-sm break-all" style={{ color: "#834A1F" }}>
+                <a href={data.demo_url} target="_blank" rel="noopener noreferrer" className="text-sm break-all" style={{ color: "#B01020" }}>
                   {data.demo_url}
                 </a>
               </>
@@ -164,7 +164,7 @@ export default function AdminSubmissionDetail() {
           </div>
 
           {/* Outcome */}
-          <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+          <div className="rounded-[18px] p-5" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
             <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "var(--ql-cafe)" }}>Outcome</p>
             <div className="grid grid-cols-2 gap-4 mb-3">
               <div>
@@ -179,7 +179,7 @@ export default function AdminSubmissionDetail() {
                 </p>
               </div>
             </div>
-            <div className="pt-3 space-y-2" style={{ borderTop: "1px solid rgba(169,140,117,0.15)" }}>
+            <div className="pt-3 space-y-2" style={{ borderTop: "1px solid rgba(180,20,40,0.12)" }}>
               {data.proof_hash && (
                 <div>
                   <p className="text-xs" style={{ color: "var(--ql-cafe)" }}>Proof Hash</p>
@@ -187,17 +187,17 @@ export default function AdminSubmissionDetail() {
                 </div>
               )}
               {data.eas_attestation_uid && data.eas_attestation_uid !== "0x" + "0".repeat(64) && (
-                <a href={easAttestationUrl(data.eas_attestation_uid)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#834A1F" }}>
+                <a href={easAttestationUrl(data.eas_attestation_uid)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#B01020" }}>
                   EAS Attestation →
                 </a>
               )}
               {data.tx_hash_approval && (
-                <a href={explorerTxUrl(data.tx_hash_approval)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#834A1F" }}>
+                <a href={explorerTxUrl(data.tx_hash_approval)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#B01020" }}>
                   Approval tx →
                 </a>
               )}
               {data.tx_hash_claim && (
-                <a href={explorerTxUrl(data.tx_hash_claim)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#834A1F" }}>
+                <a href={explorerTxUrl(data.tx_hash_claim)} target="_blank" rel="noopener noreferrer" className="block text-xs" style={{ color: "#B01020" }}>
                   Claim tx →
                 </a>
               )}
@@ -207,7 +207,7 @@ export default function AdminSubmissionDetail() {
 
         {/* Failure reasons */}
         {data.failure_reasons_json && Array.isArray(data.failure_reasons_json) && data.failure_reasons_json.length > 0 && (
-          <div className="rounded-[18px] p-5 mb-6" style={{ background: "#3F1F1F", border: "1px solid #6B3838" }}>
+          <div className="rounded-[18px] p-5 mb-6" style={{ background: "rgba(196,80,64,0.1)", border: "1px solid rgba(196,80,64,0.3)" }}>
             <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "#F0DADA" }}>Failure Reasons</p>
             <ul className="space-y-1">
               {data.failure_reasons_json.map((r, i) => (
@@ -218,7 +218,7 @@ export default function AdminSubmissionDetail() {
         )}
 
         {/* Proof checks */}
-        <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid rgba(169,140,117,0.15)" }}>
+        <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid rgba(180,20,40,0.12)" }}>
           <div className="px-5 py-3" style={{ background: "var(--ql-night)" }}>
             <p className="text-xs uppercase tracking-widest" style={{ color: "var(--ql-cafe)" }}>Proof Checks</p>
           </div>
@@ -230,7 +230,7 @@ export default function AdminSubmissionDetail() {
             <table className="w-full text-sm">
               <tbody>
                 {data.proof_checks.map((c, i) => (
-                  <tr key={c.id} style={{ borderTop: i > 0 ? "1px solid rgba(169,140,117,0.08)" : undefined, background: "rgba(255,255,255,0.02)" }}>
+                  <tr key={c.id} style={{ borderTop: i > 0 ? "1px solid rgba(180,20,40,0.08)" : undefined, background: "rgba(255,255,255,0.02)" }}>
                     <td className="px-5 py-3">
                       <p style={{ color: "#F6F1EA" }}>{CHECK_LABELS[c.check_name] || c.check_name}</p>
                       {c.details_json?.details && (
@@ -238,7 +238,7 @@ export default function AdminSubmissionDetail() {
                       )}
                     </td>
                     <td className="px-5 py-3 text-center w-16">
-                      <span className="inline-block w-5 h-5 rounded-full text-xs font-bold leading-5" style={c.passed ? { background: "#2D5A2D", color: "#F6F1EA" } : { background: "#6B3838", color: "#F0DADA" }}>
+                      <span className="inline-block w-5 h-5 rounded-full text-xs font-bold leading-5" style={c.passed ? { background: "rgba(122,158,111,0.35)", color: "#F6F1EA" } : { background: "rgba(196,80,64,0.3)", color: "#F0DADA" }}>
                         {c.passed ? "✓" : "✕"}
                       </span>
                     </td>
@@ -253,7 +253,7 @@ export default function AdminSubmissionDetail() {
         </div>
 
         {data.explanation && (
-          <div className="rounded-[18px] p-5 mt-6" style={{ background: "var(--ql-night)", border: "1px solid rgba(169,140,117,0.15)" }}>
+          <div className="rounded-[18px] p-5 mt-6" style={{ background: "var(--ql-night)", border: "1px solid rgba(180,20,40,0.12)" }}>
             <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--ql-cafe)" }}>Submitter Explanation</p>
             <p className="text-sm leading-relaxed" style={{ color: "#F6F1EA" }}>{data.explanation}</p>
           </div>

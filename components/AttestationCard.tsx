@@ -23,7 +23,7 @@ export default function AttestationCard({
       className="rounded-[18px] p-6 border"
       style={{
         background: "var(--ql-bighorn)",
-        borderColor: "rgba(169,140,117,0.3)",
+        borderColor: "rgba(180,20,40,0.18)",
       }}
     >
       <div className="flex items-start justify-between mb-4">
@@ -43,7 +43,7 @@ export default function AttestationCard({
         </div>
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "#834A1F" }}
+          style={{ background: "#B01020" }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path
@@ -87,7 +87,7 @@ export default function AttestationCard({
         target="_blank"
         rel="noopener noreferrer"
         className="block w-full text-center py-2.5 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
-        style={{ background: "#834A1F", color: "#F6F1EA" }}
+        style={{ background: "#B01020", color: "#F6F1EA" }}
       >
         View on EASScan →
       </a>

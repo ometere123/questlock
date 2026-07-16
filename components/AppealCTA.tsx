@@ -72,7 +72,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
   if (existing) {
     const tone =
       existing.status === "APPROVED"
-        ? { background: "#D9EDD9", color: "#2D5A2D" }
+        ? { background: "#D9EDD9", color: "rgba(122,158,111,0.35)" }
         : existing.status === "REJECTED" || existing.status === "APPROVE_FAILED"
         ? { background: "#F0DADA", color: "#7A2020" }
         : { background: "#FFF1D6", color: "#7A5A20" };
@@ -93,7 +93,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
             {STATUS_LABEL[existing.status] || existing.status}
           </span>
         </div>
-        <p className="text-sm mb-2" style={{ color: "var(--ql-derby)" }}>
+        <p className="text-sm mb-2" style={{ color: "var(--ql-bear)" }}>
           {existing.reason}
         </p>
         {existing.admin_notes && (
@@ -102,7 +102,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
           </p>
         )}
         {existing.status === "APPROVED" && (
-          <p className="text-xs mt-3" style={{ color: "#2D5A2D" }}>
+          <p className="text-xs mt-3" style={{ color: "rgba(122,158,111,0.35)" }}>
             Reward is now claimable. Refresh this page if the claim button is not visible yet.
           </p>
         )}
@@ -117,7 +117,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
         style={{ background: "var(--card)", border: "1px solid var(--border)" }}
       >
         <div>
-          <p className="text-sm font-semibold" style={{ color: "var(--ql-bighorn)" }}>
+          <p className="text-sm font-semibold" style={{ color: "#F0E6E2" }}>
             Believe this was a mistake?
           </p>
           <p className="text-xs mt-0.5" style={{ color: "var(--ql-bear)" }}>
@@ -127,7 +127,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
         <button
           onClick={() => setShowForm(true)}
           className="shrink-0 px-4 py-2 rounded-full text-xs font-semibold"
-          style={{ background: "#22150C", color: "#F6F1EA" }}
+          style={{ background: "#1A0A08", color: "#F6F1EA" }}
         >
           Request review
         </button>
@@ -155,7 +155,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
         style={{
           background: "var(--card)",
           border: "1px solid var(--ql-cafe)",
-          color: "var(--ql-bighorn)",
+          color: "#F0E6E2",
         }}
       />
       {error && (
@@ -166,7 +166,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
           onClick={submit}
           disabled={busy}
           className="px-5 py-2 rounded-full text-xs font-semibold disabled:opacity-60"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}
+          style={{ background: "#B01020", color: "#F6F1EA" }}
         >
           {busy ? "Submitting…" : "Submit appeal"}
         </button>
@@ -174,7 +174,7 @@ export default function AppealCTA({ submissionId, walletAddress }: Props) {
           onClick={() => setShowForm(false)}
           disabled={busy}
           className="px-5 py-2 rounded-full text-xs font-medium"
-          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
         >
           Cancel
         </button>

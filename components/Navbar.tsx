@@ -55,16 +55,23 @@ export default function Navbar() {
 
   return (
     <nav
-      style={{ backgroundColor: "var(--ql-bighorn)" }}
-      className="sticky top-0 z-50 border-b border-white/10"
+      style={{ backgroundColor: "rgba(20,6,4,0.88)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)", borderBottom: "1px solid rgba(180,20,40,0.12)" }}
+      className="sticky top-0 z-50 ql-scan-top"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-            <rect width="28" height="28" rx="6" fill="#834A1F" />
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#8B0A14" />
+                <stop offset="55%" stopColor="#B01020" />
+                <stop offset="100%" stopColor="#C89B3C" />
+              </linearGradient>
+            </defs>
+            <rect width="28" height="28" rx="6" fill="url(#logo-grad)" />
             <path
               d="M14 6C10.69 6 8 8.69 8 12v1H7v9h14v-9h-1v-1c0-3.31-2.69-6-6-6zm0 2c2.21 0 4 1.79 4 4v1h-8v-1c0-2.21 1.79-4 4-4zm0 7a2 2 0 110 4 2 2 0 010-4z"
-              fill="#F6F1EA"
+              fill="#F0E6E2"
             />
           </svg>
           <span className="font-serif text-lg font-semibold tracking-tight" style={{ color: "#F6F1EA" }}>
@@ -112,7 +119,7 @@ export default function Navbar() {
             <button
               onClick={login}
               className="text-sm px-5 py-2 rounded-full font-medium transition-all hover:opacity-90"
-              style={{ background: "var(--ql-chocolate)", color: "var(--accent-foreground)" }}
+              style={{ background: "linear-gradient(135deg,var(--ember),var(--ember-2),var(--gold))", backgroundSize: "200% auto", color: "#F0E6E2" }}
             >
               Connect Wallet
             </button>
@@ -202,7 +209,7 @@ export default function Navbar() {
                 <button
                   onClick={() => { setMobileOpen(false); login(); }}
                   className="w-full text-sm px-5 py-2.5 rounded-full font-medium"
-                  style={{ background: "var(--ql-chocolate)", color: "var(--accent-foreground)" }}
+                  style={{ background: "linear-gradient(135deg,var(--ember),var(--ember-2),var(--gold))", backgroundSize: "200% auto", color: "#F0E6E2" }}
                 >
                   Connect Wallet
                 </button>

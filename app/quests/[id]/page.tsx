@@ -94,7 +94,7 @@ export default async function QuestDetailPage({
             <div className="text-right">
               <p
                 className="text-3xl font-bold font-mono"
-                style={{ color: "#834A1F" }}
+                style={{ color: "#B01020" }}
               >
                 {quest.reward_amount} QUEST
               </p>
@@ -130,11 +130,11 @@ export default async function QuestDetailPage({
             >
               <h2
                 className="font-serif text-lg font-semibold mb-3"
-                style={{ color: "var(--ql-bighorn)" }}
+                style={{ color: "#F0E6E2" }}
               >
                 Description
               </h2>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--ql-derby)" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--ql-bear)" }}>
                 {quest.description || "No description provided."}
               </p>
             </div>
@@ -150,7 +150,7 @@ export default async function QuestDetailPage({
               >
                 <h2
                   className="font-serif text-lg font-semibold"
-                  style={{ color: "var(--ql-bighorn)" }}
+                  style={{ color: "#F0E6E2" }}
                 >
                   Scoring Rubric
                 </h2>
@@ -164,7 +164,7 @@ export default async function QuestDetailPage({
                   className="flex items-center justify-between px-6 py-3 text-sm border-t"
                   style={{ borderColor: "var(--border)" }}
                 >
-                  <span style={{ color: "var(--ql-derby)" }}>{label}</span>
+                  <span style={{ color: "var(--ql-bear)" }}>{label}</span>
                   <span
                     className="font-mono font-semibold shrink-0 ml-4"
                     style={{ color: "var(--ql-chocolate)" }}
@@ -185,11 +185,11 @@ export default async function QuestDetailPage({
               >
                 <p
                   className="font-serif text-lg mb-2"
-                  style={{ color: "var(--ql-bighorn)" }}
+                  style={{ color: "#F0E6E2" }}
                 >
                   Quest expired
                 </p>
-                <p className="text-sm" style={{ color: "var(--ql-derby)" }}>
+                <p className="text-sm" style={{ color: "var(--ql-bear)" }}>
                   This quest is no longer accepting submissions.
                 </p>
               </div>
@@ -204,7 +204,7 @@ export default async function QuestDetailPage({
                 />
                 <h2
                   className="font-serif text-lg font-semibold mb-5"
-                  style={{ color: "var(--ql-bighorn)" }}
+                  style={{ color: "#F0E6E2" }}
                 >
                   Submit Proof
                 </h2>

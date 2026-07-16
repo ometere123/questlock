@@ -97,7 +97,7 @@ export default function ProofTimeline({ status }: { status: string }) {
                 <div
                   className="w-0.5 h-6 mt-0.5"
                   style={{
-                    background: state === "done" ? "#2D5A2D" : "var(--border)",
+                    background: state === "done" ? "rgba(122,158,111,0.35)" : "var(--border)",
                   }}
                 />
               )}
@@ -108,9 +108,9 @@ export default function ProofTimeline({ status }: { status: string }) {
                 style={{
                   color:
                     state === "active"
-                      ? "#834A1F"
+                      ? "#B01020"
                       : state === "done"
-                      ? "#2D5A2D"
+                      ? "rgba(122,158,111,0.35)"
                       : state === "failed"
                       ? "#7A2020"
                       : "var(--ql-bear)",

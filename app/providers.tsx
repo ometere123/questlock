@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         supportedChains: [baseSepolia],
         appearance: {
           theme: "light",
-          accentColor: "#834A1F",
+          accentColor: "#B01020",
           logo: "/logo.svg",
           showWalletLoginFirst: false,
           landingHeader: "Sign in to QuestLock",

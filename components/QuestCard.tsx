@@ -44,14 +44,14 @@ export default function QuestCard({
     <Link href={`/quests/${id}`} className="block quest-card p-6 group">
       <div className="flex items-start justify-between gap-4 mb-3">
         <h3
-          className="font-serif text-lg font-semibold leading-snug group-hover:text-[#834A1F] transition-colors"
-          style={{ color: "var(--ql-bighorn)" }}
+          className="font-serif text-lg font-semibold leading-snug group-hover:text-[#B01020] transition-colors"
+          style={{ color: "#F0E6E2" }}
         >
           {title}
         </h3>
         <span
           className="shrink-0 font-semibold text-sm px-3 py-1 rounded-full"
-          style={{ background: "#834A1F", color: "#F6F1EA" }}
+          style={{ background: "#B01020", color: "#F6F1EA" }}
         >
           {rewardAmount} QUEST
         </span>
@@ -59,7 +59,7 @@ export default function QuestCard({
 
       <p
         className="text-sm leading-relaxed mb-4 line-clamp-2"
-        style={{ color: "var(--ql-derby)" }}
+        style={{ color: "var(--ql-bear)" }}
       >
         {description}
       </p>
@@ -67,19 +67,19 @@ export default function QuestCard({
       <div className="flex flex-wrap gap-2 text-xs mb-4">
         <span
           className="px-2 py-0.5 rounded"
-          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
         >
           GitHub Project
         </span>
         <span
           className="px-2 py-0.5 rounded"
-          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
         >
           Min score: {minScore}
         </span>
         <span
           className="px-2 py-0.5 rounded"
-          style={{ background: "var(--muted)", color: "var(--ql-derby)" }}
+          style={{ background: "var(--muted)", color: "var(--ql-bear)" }}
         >
           {BADGE_NAMES[badgeId] || `Badge #${badgeId}`}
         </span>
