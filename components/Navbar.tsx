@@ -56,7 +56,7 @@ export default function Navbar() {
   return (
     <nav
       style={{ backgroundColor: "rgba(20,6,4,0.88)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)", borderBottom: "1px solid rgba(180,20,40,0.12)" }}
-      className="sticky top-0 z-50 ql-scan-top"
+      className="sticky top-0 z-50 ql-nav-scan"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 shrink-0">

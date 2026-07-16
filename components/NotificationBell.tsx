@@ -112,7 +112,7 @@ export default function NotificationBell() {
 
       {open && (
         <div
-          className="absolute right-0 mt-2 w-80 max-h-[28rem] overflow-y-auto rounded-2xl shadow-2xl z-50"
+          className="absolute right-0 mt-2 w-80 max-h-[28rem] overflow-y-auto rounded-2xl shadow-2xl z-[200]"
           style={{
             background: "var(--ql-night)",
             border: "1px solid rgba(180,20,40,0.15)",

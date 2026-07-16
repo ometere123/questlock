@@ -156,6 +156,23 @@ body {
   pointer-events: none;
 }
 
+/* Navbar variant — no overflow:hidden so dropdown isn't clipped */
+.ql-nav-scan {
+  position: relative;
+}
+.ql-nav-scan::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1.5px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--ember-2), var(--gold), transparent);
+  background-size: 200% auto;
+  animation: ql-scan 3.5s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
 /* ── STATUS BADGE COLOURS ─────────────────────────────────── */
 .badge-submitted {
   background: rgba(61,26,22,0.9);
