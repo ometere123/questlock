@@ -1,321 +1,382 @@
 # QuestLock
 
-> Rewards should follow proof, not farming.
+> **Rewards should follow proof, not farming.**
 
-QuestLock is a deterministic proof-powered quest platform on Base Sepolia. Users submit GitHub project proof, pass objective checks, receive a public EAS attestation, and claim rewards gaslessly.
+[![Next.js](https://img.shields.io/badge/Next.js_15-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![Base Sepolia](https://img.shields.io/badge/Base_Sepolia-0052FF?style=flat-square&logo=coinbase)](https://sepolia.basescan.org)
+[![EAS](https://img.shields.io/badge/EAS_Attestations-6B4EFF?style=flat-square)](https://attest.org)
+[![Privy](https://img.shields.io/badge/Privy_Auth-000000?style=flat-square)](https://privy.io)
+[![Supabase](https://img.shields.io/badge/Supabase_Postgres-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
+
+QuestLock is a **deterministic proof-powered quest platform** built on Base Sepolia. Sponsors fund quests from their own wallet. Builders submit verifiable proof. An objective engine scores the work against a 100-point rubric. Pass the threshold — get an EAS attestation, an onchain badge, and a gasless token reward. No farming. No discretion. Proof or nothing.
+
+**[quest-lock.vercel.app](https://quest-lock.vercel.app)**
 
 ---
 
-## Live deployment (Base Sepolia)
+## How It Works
+
+```
+Sponsor creates quest → funds pool from own wallet (QuestLockCoreV2)
+        ↓
+Builder submits proof (GitHub / manual / Discord / X / LMS)
+        ↓
+Backend fetches evidence → deterministic engine scores (100 pts, 70 to pass)
+        ↓
+Anti-farm checks → proof hash committed onchain
+        ↓
+EAS attestation issued (public, shareable certificate)
+        ↓
+Verifier wallet calls submitAndApprove (atomic, no double-spend)
+        ↓
+Builder clicks "Claim Reward" — verifier calls claimRewardFor (gasless)
+        ↓
+ERC-20 QUEST token transferred + ERC-1155 soulbound badge minted
+```
+
+---
+
+## Deployed Contracts (Base Sepolia)
 
 | Contract | Address |
 |---|---|
-| QuestLockCore (v1, legacy shared pool) | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` |
-| **QuestLockCoreV2** (v1.2, per-quest funded) | `0xDDC0024E76C2bEC64F6f7785e232E7Ce11b0A282` |
-| QuestRewardToken | `0x154250cc3253b4C7a0f1bfe0eCc26792c81b3054` |
-| QuestBadge | `0x1010F4fB73b2DCb4b2bD43D87E0210cb6a00bBAe` |
+| **QuestLockCoreV2** (v1.2 · per-quest funded) | `0xDDC0024E76C2bEC64F6f7785e232E7Ce11b0A282` |
+| QuestLockCore (v1 · legacy shared pool) | `0xCCe52216B17096235c070ce85F5C4fFBbf9E782C` |
+| QuestRewardToken (QUEST ERC-20) | `0x154250cc3253b4C7a0f1bfe0eCc26792c81b3054` |
+| QuestBadge (ERC-1155 soulbound) | `0x1010F4fB73b2DCb4b2bD43D87E0210cb6a00bBAe` |
 | EAS Contract | `0x4200000000000000000000000000000000000021` |
 | EAS Schema UID | `0x3c9b890e57a3887a0766fe0bf74df896e9551d7b173b3113e3363149156940a6` |
 
-Legacy V1 quests continue to run on the original `QuestLockCore`. New quests created via the v1.2 sponsor flow route to **V2**. The EAS schema is shared. See `RELEASE_NOTES_v1.2.md`.
+V2 introduced per-quest funded pools — sponsors fund their own quest; rewards never come from a shared bag. V1 quests continue to run on the original contract. The EAS schema is shared across both versions.
 
-## Architecture
+---
 
-```
-User submits GitHub proof
-  → Frontend validates form + wallet
-  → Backend fetches GitHub + demo URL data
-  → Deterministic proof engine scores (100 pts, 70 to pass)
-  → Anti-farm checks (duplicate repo, demo URL, wallet)
-  → proofHash created + EAS attestation issued
-  → Verifier wallet calls submitAndApprove on QuestLockCore (atomic)
-  → User clicks "Claim Reward (Gasless)"
-  → Verifier wallet calls claimRewardFor (user pays no gas)
-  → ERC-20 reward transferred + ERC-1155 badge minted
-  → Profile updates
-```
+## Features
+
+### For Builders
+- **5 proof types** — GitHub project, manual project, Discord role, X post, LMS course
+- **Public certificates** — every passing submission gets a shareable `/proof/[id]` page with EAS attestation, score breakdown, and all tx links
+- **Gasless claims** — the verifier wallet calls `claimRewardFor` so builders pay zero gas to collect rewards
+- **Profile page** — track submissions, badges, attestations, and display name
+- **Leaderboard** — filter by proof type or badge; identity shown as `display_name → @github → 0xshort…`
+
+### For Sponsors
+- **Self-funded quests** — sponsors deposit QUEST tokens directly; admin never touches sponsor funds
+- **5 quest templates** — one per proof type, cloneable from `/create`
+- **Manual review dashboard** — approve or reject manual submissions from `/sponsor/quests/[id]`
+- **Tiered trust** — after 3 admin-confirmed approvals, sponsors are promoted to Trusted and bypass the admin queue on standard quests
+
+### For Admins
+- **Quest creation & publishing** — two-step offchain approve → onchain publish
+- **Retry Centre** — one-click idempotent retry for proof check, attestation, onchain approval, and indexer
+- **Admin confirmations queue** — review `SPONSOR_APPROVED_PENDING_ADMIN` submissions; confirm or override
+- **Analytics dashboard** — conversion rates, outflow remaining, top failure reasons per quest
+- **System panel** — env audit, indexer status, submission counts, live log tail
+
+---
 
 ## Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 15, TypeScript, Tailwind CSS |
-| Wallet | Privy + wagmi + viem |
-| Backend | Next.js API routes |
-| Database | Supabase Postgres + Prisma |
-| Contracts | Solidity 0.8.28 + Hardhat 3 + OpenZeppelin 5 |
+| Frontend | Next.js 15 App Router, TypeScript, Tailwind CSS |
+| Auth / Wallet | Privy + wagmi + viem |
+| Database | Supabase Postgres + Prisma ORM |
+| Smart Contracts | Solidity 0.8.28, Hardhat 3, OpenZeppelin 5 |
+| Attestations | EAS (Ethereum Attestation Service) |
 | Network | Base Sepolia (Chain ID 84532) |
-| Attestation | EAS (Ethereum Attestation Service) |
-| Gasless claim | Verifier wallet calls `claimRewardFor` on user's behalf |
-| Proof source | GitHub REST API |
+| Scheduled indexer | Supabase pg_cron + pg_net (every 5 min) |
+| Identity | GitHub OAuth + Discord OAuth + display name |
+
+---
 
 ## Smart Contracts
 
-| Contract | Purpose |
-|---|---|
-| `QuestLockCore` | Quest creation, atomic submit+approve, gasless claim, role-gated admin |
-| `QuestRewardToken` | ERC-20 QUEST token (testnet reward) |
-| `QuestBadge` | ERC-1155 soulbound achievement badges |
-
 ### Roles
 
-| Role | Purpose |
-|---|---|
-| `DEFAULT_ADMIN_ROLE` | Emergency control, role management |
-| `QUEST_CREATOR_ROLE` | Create quests on QuestLockCore |
-| `VERIFIER_ROLE` | Backend wallet that approves submissions + claims for users |
-| `PAUSER_ROLE` | Pause quests in emergency |
+| Role | Holder | Purpose |
+|---|---|---|
+| `DEFAULT_ADMIN_ROLE` | Admin wallet | Emergency control, role management |
+| `QUEST_CREATOR_ROLE` | Deployer wallet | Create quests onchain |
+| `VERIFIER_ROLE` | Verifier wallet | Approve submissions + claim for users |
+| `PAUSER_ROLE` | Admin wallet | Pause in emergency |
 
-### Key functions
+### Key Functions
 
-- `createQuest(...)` — admin creates a quest with reward, deadline, min score
-- `submitProofHash(questId, proofHash)` — public, user submits own proof hash
-- `submitProofHashFor(questId, user, proofHash)` — verifier submits on behalf
-- `submitAndApprove(questId, user, proofHash, attestationUID, score)` — atomic verifier call: submits + approves in one tx (used by backend)
-- `approveSubmission(...)` / `rejectSubmission(...)` — verifier review
-- `claimReward(questId)` — public, user claims their own reward
-- `claimRewardFor(questId, user)` — verifier claims on behalf (gasless UX)
+| Function | Who calls it | What it does |
+|---|---|---|
+| `createQuest(...)` | QUEST_CREATOR_ROLE | Create a quest with reward, deadline, min score |
+| `submitAndApprove(...)` | VERIFIER_ROLE | Atomic: commit proof hash + approve in one tx |
+| `claimRewardFor(questId, user)` | VERIFIER_ROLE | Gasless claim — transfers QUEST + mints badge |
+| `fundQuest(questId, amount)` | Sponsor wallet | Deposit QUEST into per-quest pool (V2 only) |
+| `withdrawUnusedFunds(questId)` | Sponsor wallet | Reclaim unused pool after deadline |
 
-## Backend Services (lib/)
+---
 
-| Service | Responsibility |
-|---|---|
-| `github.ts` | GitHub repo metadata, commits, README, file tree |
-| `demo-url.ts` | Demo URL load check with timeout + private IP blocking |
-| `scoring.ts` | 10-check deterministic scoring engine |
-| `antifarm.ts` | Duplicate detection, risk band assignment |
-| `proof-hash.ts` | Deterministic proof hash for onchain commitment |
-| `eas.ts` | EAS attestation creation (pure ethers, no SDK lock-in) |
-| `approval.ts` | Verifier wallet calls `submitAndApprove` |
-| `event-indexer.ts` | Syncs onchain events to `contract_events` table |
-| `logger.ts` | System log writer |
+## Proof Engine
 
-## Frontend Pages
-
-| Route | Purpose |
-|---|---|
-| `/` | Landing — proof-powered quests explainer |
-| `/quests` | Quest marketplace |
-| `/quests/[id]` | Quest detail + submit proof form |
-| `/submit/[questId]` | Real-time proof status, score breakdown, claim button |
-| `/me` | User profile — completed quests, rewards, badges, attestations, tx links |
-| `/ops-ql` | Admin dashboard — create quests, list submissions (gated to ADMIN_WALLET_ADDRESS) |
-| `/ops-ql/submissions/[id]` | Admin per-submission inspection — proof checks, failure reasons, all tx hashes |
-
-## API Routes
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/quests` | List active quests |
-| `GET /api/quests/[id]` | Single quest detail |
-| `POST /api/proof/submit` | Submit proof → score → attest → approve (full pipeline) |
-| `GET /api/proof/status/[id]` | Poll submission status |
-| `POST /api/relay/claim` | Verifier-signed gasless claim |
-| `GET /api/submissions?wallet=` | User's submission history |
-| `GET /api/admin/quests` | Admin quest list |
-| `GET /api/admin/submissions` | Admin submission list |
-| `GET /api/ops-ql/submissions/[id]` | Admin submission detail |
-| `POST /api/indexer` | Manually trigger event indexer (needs `x-indexer-secret`) |
-| `GET /api/health` | Public health check — env audit + DB ping + RPC ping, returns 200/503 |
-| `GET /api/ops-ql/system-status` | Admin-only system panel feed (env, indexer, submission counts, recent logs) |
-
-## v1.1 creator / sponsor guard
-
-- Backend-enforced — **no contract change**. Sits in front of `/api/proof/submit` before any GitHub or scoring work runs.
-- `quests.sponsor_wallet` (nullable) added so sponsor-published quests carry both the publishing admin (`created_by`) and the original sponsor wallet. v1 sample quests and direct-API-created quests are unaffected (column is NULL).
-- Pure guard in `lib/creator-guard.ts` — case-insensitive, testable without DB.
-- Blocked submission returns HTTP 403 with `error = "You cannot submit proof for a quest you created or sponsored."` and `blockedBy = "creator" | "sponsor"`.
-- UI on `/quests/[id]`: `CreatorGuardNotice` renders a red banner above the form, and the Submit button itself is disabled with the same copy.
-- Existing v1 submissions are untouched.
-
-## v1.1 quest analytics
-
-- Admin-only read-only dashboard at **`/ops-ql/analytics`** built from cards, tables and percentages — no charting library, no client state beyond a refresh button.
-- Pure aggregator in `lib/analytics.ts` (`aggregateQuestAnalytics`, `potentialOutflowRemaining`) means the math is unit-testable without DB.
-- Global tiles: total quests, total submissions, total approved onchain, total claimed, global approval conversion %, global claim conversion %, live QuestLockCore QUEST pool balance (read via `viem` from `QuestRewardToken.balanceOf`).
-- Per-quest cards: submitted / passed / failed / claimable / claimed / avg score, approval conversion %, claim conversion %, **potential outflow remaining** (`(maxClaims − totalClaims) × rewardAmount`), and the top 5 failure reasons for that quest.
-- Global top-8 failure reasons across all quests so admin can spot the most common builder mistakes at a glance.
-- Single endpoint: `GET /api/ops-ql/analytics` returns one JSON payload with everything the page needs.
-- 11 new aggregator tests cover empty input, mixed-status counting, conversion rates, top-N sorting + cap, defensive null/non-array handling, in-progress bucket boundaries.
-
-## v1.1 proof engine hardening
-
-- New `lib/retry.ts` (exponential backoff, retryable-status whitelist) used by both the GitHub fetcher and the demo-URL probe. Transient `429`, `408`, `425`, `5xx`, timeouts and socket errors are retried up to 2 times before giving up.
-- `lib/github.ts` now captures: fork status, default branch, primary language, file count and max directory depth, package manager (`npm` / `pnpm` / `yarn` / `bun`), README section-heading count, and crucially **commit authorship** — how many of the post-start commits are attributed to the submitting GitHub user (login, name or email heuristic).
-- Frontend / contract detection expanded to a regex set covering Next / Vite / Svelte / Nuxt configs, `*.tsx`, `*.sol`, Hardhat / Foundry / Truffle configs, `server/`, `api/`, `prisma/`, plus Go/Rust/Java backend signals.
-- Scoring (`lib/scoring.ts`) keeps the same **100-point ceiling** and the same 10 check names so existing data is still comparable. What changes:
-  - `commits_after_start` now fails if every post-start commit is unattributable to the submitting user (typical fork-without-work pattern).
-  - All failure-reason copy got crisper — for example, `frontend_files` now lists the patterns it looked for.
-  - Demo URL details include the retry attempt count when a retry occurred.
-- Soft `warnings[]` channel: signals that should inform but not zero a check (e.g. "Repository is a fork.") flow through scoring → API response → UI without affecting the score.
-- Tests: 5 new tests for `lib/retry.ts` and 7 new tests for `lib/scoring.ts` covering happy path, fork warnings, unattributed commits, duplicate gate, demo failure surfacing.
-
-## v1.1 manual review / appeals queue
-
-- New `submission_appeals` table with one-appeal-per-submission constraint. Lifecycle: `PENDING → PROCESSING → APPROVED | REJECTED | APPROVE_FAILED` (the last is retryable).
-- Failed-proof view (`/submit/[questId]?submissionId=…`) now shows an "Request review" CTA only to the submitting wallet. After submission the same panel shows the appeal status + admin notes.
-- Admin review queue at **`/ops-ql/appeals`** lists every appeal with quest title, submitter wallet/GitHub, original score vs minimum, the user's appeal reason, the original failure reasons, repo + demo links, and an inline link to the full submission detail.
-- **Approve** runs `lib/appeal-approve.ts`:
-  1. Re-uses the existing `proof_hash` if present, otherwise mints a fresh deterministic hash.
-  2. Issues an EAS attestation tagged `riskBand = "MANUAL_REVIEW"` so the public certificate is transparent about the override.
-  3. Calls the existing `submitAndApprove(questId, user, proofHash, attestationUID, score)` via the verifier wallet — same path v1 uses. **No contract redeploy was required.**
-  4. The onchain score is lifted to `max(score, minScore)` to clear the contract's score floor; the actual deterministic score remains in the EAS attestation.
-  5. Updates the submission to `APPROVED_ONCHAIN` with `risk_band = "MANUAL_REVIEW"` so the existing claim button appears for the user.
-- **Reject** marks the appeal closed without touching onchain state.
-- **Known limitation** (per spec): the existing contract has no path to flip an onchain `REJECTED` submission into `APPROVED`. In v1 the verifier never calls `rejectSubmission` for failed offchain proofs (failures terminate before going onchain), so this affects nothing today. If a future change starts rejecting onchain we will need a contract update.
-- API:
-  - `POST /api/appeals` (user, rate-limited 2/min) — body `{ submissionId, walletAddress, reason }`
-  - `GET  /api/appeals?wallet=` — user's own appeals
-  - `GET  /api/ops-ql/appeals` — admin queue
-  - `POST /api/ops-ql/appeals/[id]/approve|reject` — admin actions
-
-## v1.1 sponsor / creator quest requests
-
-- `quest_requests` table holds offchain submissions from sponsors with the lifecycle: `PENDING_REVIEW → APPROVED → PUBLISHING → PUBLISHED`. Branches: `REJECTED`, `PUBLISH_FAILED` (retryable).
-- Public form at **`/create`** lets any connected wallet propose a quest. Sponsors can revisit `/create` to see their own requests, statuses and rejection reasons.
-- Admin review queue at **`/ops-ql/quest-requests`** (gated to `ADMIN_WALLET_ADDRESS`). Two-step admin flow:
-  1. **Approve** offchain — no gas spent.
-  2. **Publish onchain** — separate explicit click, calls `QuestLockCore.createQuest` via the deployer wallet (which holds `QUEST_CREATOR_ROLE`), parses the `QuestCreated` event for the new `onchainQuestId`, inserts a `quests` row tied to that id, and marks the request `PUBLISHED`.
-- Publish failures land in `PUBLISH_FAILED` with the error captured in `publish_error`; admin can retry without re-submitting.
-- API:
-  - `POST /api/quest-requests` (public, rate-limited 3/min per wallet)
-  - `GET  /api/quest-requests?wallet=` (sponsor's own list)
-  - `GET  /api/ops-ql/quest-requests` (admin list)
-  - `POST /api/ops-ql/quest-requests/[id]/approve|reject|publish` (admin actions)
-- Random users cannot publish quests directly in v1.1 — only admin approval + admin publish creates onchain quests.
-
-## v1.1 public proof / certificate pages
-
-- `/proof/[submissionId]` is a public, shareable certificate page. No auth required.
-- Only submissions in `ATTESTED`, `APPROVED_ONCHAIN`, `CLAIMING`, or `CLAIMED` are visible — failed and in-progress submissions 404.
-- The whitelist of exposed fields lives in `lib/public-proof.ts` (`toPublicProof`) — explanation, raw failure reasons, and any other private signal is never serialised into the public payload.
-- The page renders quest title + subject (GitHub login if linked, else short wallet), score, risk band, badge, repo + demo links, EAS attestation, approval tx, claim tx, proof hash and per-check pass/fail.
-- API: `GET /api/proof/public/[id]` mirrors the same data with the same whitelist for machine-readable use.
-- OpenGraph metadata is generated per-proof so the link previews nicely on Twitter / Telegram / Slack.
-
-## v1.1 GitHub account linking
-
-- New columns on `users`: `github_id`, `github_login`, `github_avatar_url`, `github_profile_url`, `github_connected_at` (unique on id + login).
-- OAuth flow: `POST /api/auth/github/start` → user redirected to GitHub → `GET /api/auth/github/callback` → user redirected to `/me?github=...`.
-- `GET /api/auth/github/status?wallet=` reports link state. `POST /api/auth/github/disconnect` clears it.
-- State token is an HMAC-signed `body.signature` carrying `{wallet, nonce, exp}`; signed with `INDEXER_SECRET` (or `VERIFIER_PRIVATE_KEY` as a fallback). Tokens expire after 10 minutes.
-- Access tokens are exchanged server-side and discarded immediately after the `/user` lookup — they never reach the browser.
-- Proof submission requires a linked GitHub account and rejects submissions whose repository owner does not exactly match the linked login.
-- Need a GitHub OAuth App: create one at https://github.com/settings/developers with Authorization callback URL set to `${NEXT_PUBLIC_APP_URL}/api/auth/github/callback`. Fill `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `GITHUB_OAUTH_REDIRECT_URI` in `.env`.
-
-## v1.1 ops hardening
-
-- `lib/env.ts` — `requireEnv()` / `auditEnv()` validate required vs optional env vars at startup. Use `requireEnv` in any code path that needs a server secret.
-- `lib/rate-limit.ts` — in-process token-bucket limiter wired into `/api/proof/submit` and `/api/relay/claim`. **Best-effort:** state is held in module memory and resets on server restart / serverless cold start. Swap to a Supabase-backed store if you need durability.
-- `/api/health` — JSON status with env audit, DB ping latency, RPC tip block. Returns HTTP 503 if any required env var is missing or DB/RPC is unreachable.
-- `/ops-ql` System tab — env audit, indexer status (last block, last event, total events), live submission counts grouped by status, last 25 system log lines.
-
-## Proof Checks (100 pts, 70 to pass)
+### Scoring Rubric (GitHub Project · 100 pts · 70 to pass)
 
 | Check | Points |
 |---|---|
 | Repository exists and is public | 10 |
-| Owner matches submitted GitHub username | 10 |
+| Owner matches linked GitHub username | 10 |
 | Repository updated after quest start | 10 |
-| 3+ commits after quest start | 15 |
+| 3+ commits after quest start (by submitter) | 15 |
 | README file present | 10 |
 | README has 500+ characters | 10 |
 | Frontend files detected | 10 |
-| Contract/backend files detected | 10 |
-| Demo URL loads | 10 |
+| Contract or backend files detected | 10 |
+| Demo URL loads successfully | 10 |
 | Not previously submitted | 5 |
 
-## Submission Status Lifecycle
+Other proof types (`manual_project`, `discord_role`, `x_post`, `lms_course`) implement the same `ProofAdapter` interface and share the same pipeline — only the evidence fetch and scoring logic differs.
 
-`SUBMITTED → FETCHING_PROOF → EVALUATING → PASSED → ATTESTING → ATTESTED → APPROVING_ONCHAIN → APPROVED_ONCHAIN → CLAIMING → CLAIMED`
+### Submission Status Lifecycle
 
-Failure paths land in `FAILED`, `REJECTED`, or `CLAIM_FAILED`.
-
-## Environment Setup
-
-```bash
-cp .env.example .env
-# Fill all values (see docs/DEPLOYMENT.md)
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
 ```
+SUBMITTED → FETCHING_PROOF → EVALUATING → PASSED → ATTESTING
+  → ATTESTED → APPROVING_ONCHAIN → APPROVED_ONCHAIN → CLAIMING → CLAIMED
 
-## Build commands
-
-```bash
-npm run dev              # Dev server
-npm run build            # Production build (passes ✓)
-npm run typecheck        # tsc --noEmit (passes ✓)
-npm run lint             # Same as typecheck
-npm run test:contracts   # Hardhat unit tests (18 passing ✓)
+Failure paths: FAILED · REJECTED · CLAIM_FAILED
+Sponsor queue: SPONSOR_APPROVED_PENDING_ADMIN (new sponsors, high-value quests)
 ```
-
-## Base Sepolia Deployment
-
-```bash
-npm run contracts:compile
-npm run contracts:deploy           # Deploy all three contracts
-npm run contracts:grant-roles      # Grant VERIFIER_ROLE
-npm run contracts:seed-quest       # Fund + create sample quest
-```
-
-## v1.2 — Sponsor-funded multi-proof release
-
-> Full notes in `RELEASE_NOTES_v1.2.md`. Known limitations in `KNOWN_LIMITATIONS.md`.
-
-- **QuestLockCoreV2** — per-quest funded pool. Sponsors fund their own quest; rewards never come from a shared bag. State machine: `UNFUNDED → PARTIALLY_FUNDED → FUNDED → UNDERFUNDED → CLOSED / REFUNDED`. Sponsor can withdraw unused funds after deadline.
-- **Contract-version routing** — `quests.contract_version` (1 or 2) + `lib/contracts.ts#coreAddressFor` route all approve/claim/funding calls. Legacy V1 quests are untouched.
-- **5 proof adapters** via `lib/adapters/*` — `github_project` (existing v1.1 logic, unchanged), `manual_project`, `discord_role`, `x_post`, `lms_course`. All implement the same `ProofAdapter` interface (`validateInput`, `fetchEvidence`, `scoreEvidence`, `buildPublicProofPayload`, `buildPrivateEvidence`).
-- **Sponsor dashboard** — `/sponsor` lists your funded quests; `/sponsor/quests/[id]` lets you fund, top up, withdraw unused, and close. All transactions signed by your connected wallet — no backend keys touch sponsor funds.
-- **Public leaderboard** — `/leaderboard`, proof-backed, only completed quests count.
-- **In-app notifications** — bell in Navbar polls `/api/notifications` every 30s; mark-one-read on click, mark-all-read button.
-- **Quest templates** — 5 seeded presets at `/api/templates` (one per proof type) that sponsors can clone.
-- **Adapter-aware `/proof/[id]`** — public certificate page renders per-type fields from the adapter whitelist. No private evidence ever leaks.
-- **Admin Retry Centre** — `/ops-ql/retry` has one-click idempotent retry for proof check, attestation, onchain approval, and indexer.
-- **Discord OAuth scaffold** — `/api/auth/discord/*`, HMAC-signed state cookies. Required for `discord_role` proofs.
-- **Durable rate limits** — Supabase-backed `rate_limit_buckets` with in-process fallback.
-- **Scheduled indexer** — external cron service (e.g. cron-job.org) hits `/api/indexer` with the `x-indexer-secret` header. Vercel native cron was removed (Hobby tier caps at 1 run/day). The Retry Centre also has a manual "Run indexer now" button.
-
-### v1.2 contract & DB additions
-
-- `contracts/QuestLockCoreV2.sol` — `viaIR: true` build, atomic `submitAndApprove` + `claimReward`, per-quest funding accounting.
-- Additive Prisma migration `20260605000000_v12_sponsor_funded`:
-  - `quests`: `contract_version`, `funded_quest_id`, `funding_status`, `required_funding`, `funded_amount`, `claimed_amount_onchain`, `withdrawn_amount`, `proof_type`
-  - `submissions`: `proof_type`, `evidence_json`
-  - `quest_requests`: `proof_type`, `required_funding`, `funded_amount`
-  - new tables: `rate_limit_buckets`, `notifications`, `discord_connections`, `quest_templates`
-- No legacy column changed, no constraint dropped, no schema migration risk.
-
-## Known Limitations
-
-See `KNOWN_LIMITATIONS.md` for the full v1.2 list. Highlights:
-
-- GitHub proof is the only fully deterministic adapter. Manual / X / LMS default to admin review; Discord is deterministic only when `DISCORD_BOT_TOKEN` is configured.
-- Base Sepolia testnet only — no mainnet, no multi-chain.
-- No paid X API integration (free tier doesn't return post content).
-- The old verifier wallet remains authorised on V1 as a rollback path — rotation cut-over is deliberate.
-
-## Future Improvements
-
-- Paid X API integration → deterministic post content checks
-- Mainnet deployment + multi-chain reward bridging
-- Reputation levels and seasonal quests
-- Sponsor self-publish (skip admin approval for trusted sponsors)
-
-## Brand System
-
-Warm proof infrastructure palette:
-- `#22150C` Bighorn Sheep — primary dark
-- `#432C1A` Night Brown — secondary dark
-- `#5B4535` Brown Derby — muted surface
-- `#816550` Bear Creek — metadata/muted
-- `#A98C75` Cafe Americaine — borders/inputs
-- `#834A1F` Milk Chocolate — action accent (CTA, claim)
-- `#D3CBC1` Ashen Tan — light background
-
-Typography: Plus Jakarta Sans.
 
 ---
 
-QuestLock v1.2 · Base Sepolia · Proof over hype.
+## Backend Services
+
+| Module | Responsibility |
+|---|---|
+| `lib/adapters/*` | One adapter per proof type — `validateInput`, `fetchEvidence`, `scoreEvidence`, `buildPublicProofPayload` |
+| `lib/scoring.ts` | 10-check deterministic scoring engine |
+| `lib/antifarm.ts` | Duplicate detection + risk band (`LOW / MEDIUM / HIGH_RISK`) |
+| `lib/proof-hash.ts` | Deterministic keccak hash for onchain commitment |
+| `lib/eas.ts` | EAS attestation creation (pure ethers, no SDK lock-in) |
+| `lib/approval.ts` | Verifier wallet calls `submitAndApprove` |
+| `lib/event-indexer.ts` | Syncs onchain events to `contract_events` table |
+| `lib/sponsor-trust.ts` | Tiered trust — `new / trusted / flagged / suspended`, auto-promotion at 3 confirmed |
+| `lib/creator-guard.ts` | Blocks creator/sponsor from submitting their own quests |
+| `lib/contracts.ts` | Routes approve/claim/fund calls to V1 or V2 by `contract_version` |
+| `lib/rate-limit.ts` | Supabase-backed token bucket with in-process fallback |
+| `lib/logger.ts` | System log writer |
+
+---
+
+## Pages
+
+| Route | Who | Purpose |
+|---|---|---|
+| `/` | Public | Landing — proof-powered quests explainer |
+| `/quests` | Public | Quest marketplace |
+| `/quests/[id]` | Public | Quest detail + proof submission form |
+| `/submit/[questId]` | Builder | Real-time pipeline status, score breakdown, claim button |
+| `/proof/[id]` | Public | Shareable EAS certificate per submission |
+| `/leaderboard` | Public | Ranked by claimed quests; filter by proof type or badge |
+| `/me` | Builder | Profile, submissions, badges, rewards, display name, linked accounts |
+| `/create` | Sponsor | Propose a quest; track request status |
+| `/sponsor` | Sponsor | Funded quest overview + trust tier |
+| `/sponsor/quests/[id]` | Sponsor | Fund, top-up, withdraw, review manual submissions |
+| `/ops-ql` | Admin | Dashboard — system status, submission list |
+| `/ops-ql/submissions/[id]` | Admin | Per-submission inspection — all proof checks + tx hashes |
+| `/ops-ql/quest-requests` | Admin | Review + publish sponsor quest requests |
+| `/ops-ql/appeals` | Admin | Manual appeal review queue |
+| `/ops-ql/analytics` | Admin | Conversion rates, outflow, top failure reasons |
+| `/ops-ql/retry` | Admin | One-click retry for stuck pipeline stages |
+| `/ops-ql/confirmations` | Admin | Confirm or override sponsor-approved submissions |
+
+---
+
+## API Reference
+
+### Public
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/quests` | GET | List active quests |
+| `/api/quests/[id]` | GET | Single quest |
+| `/api/proof/submit` | POST | Full proof pipeline trigger |
+| `/api/proof/status/[id]` | GET | Poll submission status |
+| `/api/proof/public/[id]` | GET | Public certificate payload |
+| `/api/relay/claim` | POST | Gasless claim relay |
+| `/api/submissions` | GET | `?wallet=` — user submission history |
+| `/api/leaderboard` | GET | `?proof_type=&badge_id=` — filtered leaderboard |
+| `/api/health` | GET | Env audit + DB ping + RPC ping → 200 / 503 |
+| `/api/appeals` | GET / POST | User appeal submission |
+| `/api/notifications` | GET | Bell feed for connected wallet |
+| `/api/templates` | GET | 5 quest templates (one per proof type) |
+
+### Sponsor
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/quest-requests` | GET / POST | Submit or list own quest requests |
+| `/api/sponsor/submissions` | GET | Manual submissions for sponsor's quests |
+| `/api/sponsor/submissions/[id]/approve` | POST | Approve (routes by trust tier) |
+| `/api/sponsor/submissions/[id]/reject` | POST | Reject with optional reason |
+| `/api/sponsor/trust-status` | GET | Own trust tier self-check |
+
+### Admin
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/ops-ql/submissions/[id]` | GET | Full submission detail |
+| `/api/ops-ql/quest-requests` | GET | Quest request queue |
+| `/api/ops-ql/quest-requests/[id]/approve\|reject\|publish` | POST | Admin actions |
+| `/api/ops-ql/appeals` | GET | Appeal queue |
+| `/api/ops-ql/appeals/[id]/approve\|reject` | POST | Admin appeal actions |
+| `/api/ops-ql/analytics` | GET | Full analytics payload |
+| `/api/ops-ql/system-status` | GET | Env, indexer, counts, log tail |
+| `/api/admin/retry/queue` | GET | Stuck submission queues |
+| `/api/admin/retry/[op]` | POST | Trigger retry (proof-check / attestation / onchain-approval / indexer) |
+| `/api/admin/confirmations` | GET | Pending admin confirmation queue |
+| `/api/admin/confirmations/[id]/confirm\|reject` | POST | Admin confirm / override |
+| `/api/admin/sponsors/[wallet]/trust` | GET / POST | Read or set sponsor trust level |
+| `/api/indexer` | POST | Manual indexer trigger (`x-indexer-secret` header) |
+
+---
+
+## Environment Variables
+
+```bash
+# App
+NEXT_PUBLIC_APP_URL=
+
+# Database (Supabase connection pooler, port 6543, pgbouncer transaction mode)
+DATABASE_URL=
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# Privy
+NEXT_PUBLIC_PRIVY_APP_ID=
+
+# Wallets (never commit these)
+VERIFIER_PRIVATE_KEY=
+DEPLOYER_PRIVATE_KEY=
+
+# EAS
+EAS_SCHEMA_UID=
+
+# GitHub OAuth
+GITHUB_OAUTH_CLIENT_ID=
+GITHUB_OAUTH_CLIENT_SECRET=
+GITHUB_OAUTH_REDIRECT_URI=
+
+# Discord OAuth (for discord_role proof type)
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_REDIRECT_URI=
+DISCORD_BOT_TOKEN=        # optional — enables deterministic role checking
+
+# Indexer auth
+INDEXER_SECRET=
+
+# Admin
+ADMIN_WALLET_ADDRESS=
+```
+
+---
+
+## Local Setup
+
+```bash
+git clone https://github.com/your-org/questlock
+cd questlock
+cp .env.example .env
+# Fill all values
+
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+npm run dev
+```
+
+### GitHub OAuth App
+
+Create one at [github.com/settings/developers](https://github.com/settings/developers). Set the Authorization callback URL to `${NEXT_PUBLIC_APP_URL}/api/auth/github/callback`.
+
+---
+
+## Build & Test
+
+```bash
+npm run dev              # Dev server (localhost:3000)
+npm run build            # Production build
+npm run typecheck        # tsc --noEmit
+npm run test:contracts   # Hardhat unit tests (18 passing)
+```
+
+---
+
+## Contract Deployment (Base Sepolia)
+
+```bash
+npm run contracts:compile
+npm run contracts:deploy        # Deploy QuestLockCore + V2 + QuestRewardToken + QuestBadge
+npm run contracts:grant-roles   # Grant VERIFIER_ROLE to verifier wallet
+npm run contracts:seed-quest    # Fund + create sample quest
+```
+
+---
+
+## Scheduled Indexer
+
+The event indexer is driven by **Supabase pg_cron** — a Postgres-native cron job that fires `pg_net.http_post` to `/api/indexer` every 5 minutes. No external cron service required.
+
+```sql
+-- View the scheduled job
+select jobid, jobname, schedule, active from cron.job;
+
+-- Remove if needed
+select cron.unschedule('questlock-indexer');
+```
+
+Indexer chunks at 1900-block batches to respect Base Sepolia's public RPC cap (`eth_getLogs` max 2000 blocks). The Admin Retry Centre also has a manual "Run indexer now" button at `/ops-ql/retry`.
+
+---
+
+## Release History
+
+| Version | Tag | Highlights |
+|---|---|---|
+| v1.0 | — | Core GitHub proof, shared pool contract, EAS attestation |
+| v1.1 | — | Appeals queue, analytics, proof engine hardening, GitHub linking, creator guard |
+| v1.2.0 | `v1.2.0` | QuestLockCoreV2 per-quest pools, 5 proof adapters, sponsor dashboard, leaderboard, notifications, templates, Retry Centre |
+| v1.2.1 | `v1.2.1` | Tiered sponsor trust (`new / trusted / flagged / suspended`), admin confirmations queue, auto-promotion |
+| v1.2.2+ | `main` | Display names, Discord connect card, leaderboard filters, role chips on `/me`, mobile navbar, Supabase pg_cron indexer |
+
+Full notes in `RELEASE_NOTES_v1.2.md` · Known limitations in `KNOWN_LIMITATIONS.md` · Designer handoff in `UI_REDESIGN_HANDOFF.md`.
+
+---
+
+## Design System
+
+Warm proof infrastructure palette — Plus Jakarta Sans throughout.
+
+| Token | Hex | Role |
+|---|---|---|
+| `--ql-bighorn` | `#22150C` | Primary dark background |
+| `--ql-night` | `#432C1A` | Card surfaces |
+| `--ql-derby` | `#5B4535` | Muted text |
+| `--ql-bear` | `#816550` | Metadata / secondary text |
+| `--ql-cafe` | `#A98C75` | Borders, input labels |
+| `--ql-chocolate` | `#834A1F` | Action accent (CTA, claim) |
+| `--ql-ashen` | `#D3CBC1` | Light background |
+
+---
+
+## Known Limitations
+
+- GitHub proof is the only fully deterministic adapter. Manual / X / LMS default to admin review. Discord is deterministic only when `DISCORD_BOT_TOKEN` is configured.
+- Base Sepolia testnet only — no mainnet, no multi-chain.
+- No paid X API integration (free tier doesn't return post content).
+- The old verifier wallet remains authorised on V1 as a rollback path — rotation is deliberate.
+
+Full list in `KNOWN_LIMITATIONS.md`.
+
+---
+
+*QuestLock · Base Sepolia · Proof over hype.*
